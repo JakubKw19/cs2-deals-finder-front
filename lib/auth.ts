@@ -142,13 +142,13 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             },
         ],
         pages: {
-            signIn: "/dashboard", // Redirect here if not signed in
+            signIn: "/", // Redirect here if not signed in
             // You can define other pages like `error`, `verifyRequest`, etc.
         },
         callbacks: {
             async redirect({ url, baseUrl }) {
                 // Redirect to dashboard after successful sign-in
-                return baseUrl + "/dashboard";
+                return baseUrl + "/";
             },
             async jwt({ token, account, profile }) {
                 // console.log(token)

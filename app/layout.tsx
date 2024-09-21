@@ -1,19 +1,22 @@
-import "./globals.css";
-import type { Metadata } from "next";
+import './globals.css';
 
-export const metadata: Metadata = {
-    title: "Next.js + Steam Auth",
-    description: "Next.js App router with Steam auth",
+// import { Analytics } from '@vercel/analytics/react';
+
+export const metadata = {
+    title: 'Next.js App Router + NextAuth + Tailwind CSS',
+    description:
+        'A user admin dashboard configured with Next.js, Postgres, NextAuth, Tailwind CSS, TypeScript, and Prettier.'
 };
 
-type LayoutProps = { children: React.ReactNode };
-
-export default function RootLayout({ children }: LayoutProps) {
+export default function RootLayout({
+    children
+}: {
+    children: React.ReactNode;
+}) {
     return (
         <html lang="en">
-            <body className="flex justify-center items-center min-h-screen bg-neutral-700 text-white">
-                <div className="bg-zinc-900 p-8 rounded-xl">{children}</div>
-            </body>
+            <body className="flex min-h-screen w-full flex-col">{children}</body>
+            {/* <Analytics /> */}
         </html>
     );
 }
