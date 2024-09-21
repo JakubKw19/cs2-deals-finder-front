@@ -4,7 +4,6 @@ import { TokenSet } from "openid-client";
 import { v4 as uuidv4 } from "uuid";
 
 export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-
     return await NextAuth(req, res, {
         providers: [
             {
@@ -18,19 +17,23 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                         "openid.mode": "checkid_setup",
                         "openid.return_to": `${process.env.NEXTAUTH_URL}/api/auth/callback/steam`,
                         "openid.realm": `${process.env.NEXTAUTH_URL}/api/auth/callback/steam`,
-                        "openid.identity": "http://specs.openid.net/auth/2.0/identifier_select",
-                        "openid.claimed_id": "http://specs.openid.net/auth/2.0/identifier_select",
-                    }
+                        "openid.identity":
+                            "http://specs.openid.net/auth/2.0/identifier_select",
+                        "openid.claimed_id":
+                            "http://specs.openid.net/auth/2.0/identifier_select",
+                    },
                 },
-                clientId: 'whatever', // Not used in OpenID, but good practice
+                clientId: "whatever", // Not used in OpenID, but good practice
                 clientSecret: process.env.STEAM_CLIENT_SECRET, // Not used in OpenID, but good practice
                 checks: ["none"],
                 userinfo: {
                     async request(ctx) {
                         // console.log(ctx)
-                        console.log(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${ctx.provider.clientSecret}&steamids=${ctx.tokens.steamid}`);
+                        console.log(
+                            `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${ctx.provider.clientSecret}&steamids=${ctx.tokens.steamid}`,
+                        );
                         const user_result = await fetch(
-                            `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${ctx.provider.clientSecret}&steamids=${ctx.tokens.steamid}`
+                            `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${ctx.provider.clientSecret}&steamids=${ctx.tokens.steamid}`,
                         );
                         const json = await user_result.json();
                         return json.response.players[0];
@@ -38,12 +41,22 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 },
                 token: {
                     async request(ctx) {
-                        const url = new URL(req.url || '', `http://${req.headers.host}`);
-                        if (typeof url.searchParams.get("openid.claimed_id") === "string") {
-                            let matches = url.searchParams.get("openid.claimed_id")?.match(
-                                /^https:\/\/steamcommunity.com\/openid\/id\/([0-9]{17,25})/
-                            );
-                            const steamid = matches![1].match(/^-?\d+$/) ? matches![1] : 0;
+                        const url = new URL(
+                            req.url || "",
+                            `http://${req.headers.host}`,
+                        );
+                        if (
+                            typeof url.searchParams.get("openid.claimed_id") ===
+                            "string"
+                        ) {
+                            let matches = url.searchParams
+                                .get("openid.claimed_id")
+                                ?.match(
+                                    /^https:\/\/steamcommunity.com\/openid\/id\/([0-9]{17,25})/,
+                                );
+                            const steamid = matches![1].match(/^-?\d+$/)
+                                ? matches![1]
+                                : 0;
                             const tokenset = new TokenSet({
                                 id_token: uuidv4(),
                                 access_token: uuidv4(),
@@ -52,9 +65,8 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                             // console.log(tokenset)
                             return { tokens: tokenset };
                         }
-                        return { tokens: new TokenSet({}) }
-
-                    }
+                        return { tokens: new TokenSet({}) };
+                    },
                 },
                 profile(profile) {
                     // Handle the Steam user profile response
@@ -66,7 +78,6 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                         image: profile.avatarfull,
                     };
                 },
-
 
                 // token: {
                 //     async request(ctx) {
@@ -128,16 +139,16 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 //     };
                 // },
                 // clientId: "whateveryouwant",
-            }
+            },
         ],
         pages: {
-            signIn: '/dashboard', // Redirect here if not signed in
+            signIn: "/dashboard", // Redirect here if not signed in
             // You can define other pages like `error`, `verifyRequest`, etc.
         },
         callbacks: {
             async redirect({ url, baseUrl }) {
                 // Redirect to dashboard after successful sign-in
-                return baseUrl + '/dashboard';
+                return baseUrl + "/dashboard";
             },
             async jwt({ token, account, profile }) {
                 // console.log(token)
@@ -161,5 +172,5 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
 
         secret: process.env.NEXTAUTH_SECRET,
-    })
-}
+    });
+};

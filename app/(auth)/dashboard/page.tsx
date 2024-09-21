@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { useSession } from "next-auth/react";
 
 export default function Dashboard() {
@@ -14,7 +14,7 @@ export default function Dashboard() {
         return <div>Please log in to view your dashboard.</div>;
     }
 
-    console.log(session)
+    console.log(session);
     // Assuming your session contains the account data
     // const accountData = {
     //     avatarfull: session.picture, // Assuming picture is stored in session
@@ -31,5 +31,4 @@ export default function Dashboard() {
             </div>
         </div>
     );
-
 }
