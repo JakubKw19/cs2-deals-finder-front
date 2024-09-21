@@ -79,66 +79,6 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                     };
                 },
 
-                // token: {
-                //     async request(ctx) {
-                //         const token_params = {
-                //             "openid.assoc_handle": req.query["openid.assoc_handle"],
-                //             "openid.signed": req.query["openid.signed"],
-                //             "openid.sig": req.query["openid.sig"],
-                //             "openid.ns": "http://specs.openid.net/auth/2.0",
-                //             "openid.mode": "check_authentication",
-                //         };
-                //         const signedValues = Array.isArray(req.query["openid.signed"]) ? req.query["openid.signed"] : [req.query["openid.signed"]];
-                //         for (const val of signedValues) {
-                //             //@ts-ignore
-                //             token_params[`openid.${val}`] = req.query[`openid.${val}`];
-                //         }
-
-                //         const token_url = new URL("https://steamcommunity.com/openid/login");
-                //         // const token_url_params = new URLSearchParams(token_params);
-                //         //@ts-ignore
-                //         token_url.search = token_url_params;
-                //         const token_res = await fetch(token_url, {
-                //             method: "POST",
-                //             headers: {
-                //                 "Accept-language": "en\r\n",
-                //                 "Content-type": "application/x-www-form-urlencoded\r\n",
-                //                 // "Content-Length": `${token_url_params.toString().length}\r\n`,
-                //             },
-                //             body: token_params.toString(),
-                //         });
-                //         const result = await token_res.text();
-                //         if (result.match(/is_valid\s*:\s*true/i)) {
-                //             if (typeof req.query["openid.claimed_id"] === "string") {
-                //                 let matches = req.query["openid.claimed_id"]?.match(
-                //                     /^https:\/\/steamcommunity.com\/openid\/id\/([0-9]{17,25})/
-                //                 );
-                //                 const steamid = matches![1].match(/^-?\d+$/) ? matches![1] : 0;
-                //                 const tokenset = new TokenSet({
-                //                     id_token: uuidv4(),
-                //                     access_token: uuidv4(),
-                //                     steamid: steamid,
-                //                 });
-                //                 return { tokens: tokenset };
-                //             }
-                //             return { tokens: new TokenSet({}) }
-
-                //         } else {
-                //             return { tokens: new TokenSet({}) };
-                //         }
-                //     },
-                // },
-
-                // idToken: false,
-                // checks: ["none"],
-                // profile(profile: any) {
-                //     return {
-                //         id: profile.steamid,
-                //         image: profile.avatarfull,
-                //         name: profile.personaname,
-                //     };
-                // },
-                // clientId: "whateveryouwant",
             },
         ],
         pages: {

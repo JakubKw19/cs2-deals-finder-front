@@ -19,7 +19,9 @@
     "start": "next start"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^0.9.5",
     "class-variance-authority": "^0.7.0",
+    "drizzle-orm": "^0.33.0",
     "lucide-react": "^0.445.0",
     "next": "14.0.1",
     "next-auth": "^4.24.7",
@@ -40,6 +42,8 @@
     "@types/react-dom": "^18",
     "@types/uuid": "^10.0.0",
     "autoprefixer": "^10",
+    "dotenv": "^16.4.5",
+    "drizzle-kit": "^0.24.2",
     "eslint": "^8",
     "eslint-config-next": "14.0.1",
     "postcss": "^8",
