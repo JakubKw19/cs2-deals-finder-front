@@ -1,0 +1,18 @@
+{
+  "done": true,
+  "migration": {
+    "name": "sql_f3a23262e78813",
+    "operations": [
+      {
+        "sql": {
+          "up": "CREATE TABLE IF NOT EXISTS market_prices (id int PRIMARY KEY NOT NULL, market_hash_name text NOT NULL, steam_price json NOT NULL, buff163_price json NOT NULL, bitskins_price json NOT NULL, skinport_price json NOT NULL, lootfarm_price json NOT NULL, csgoempire_price json NOT NULL, youpin_price json NOT NULL, csmoney_price json NOT NULL, csfloat_price json NOT NULL, csgotrader_price json NOT NULL, swapgg_price json NOT NULL, csgotm_price json NOT NULL)"
+        }
+      }
+    ]
+  },
+  "migrationType": "inferred",
+  "name": "sql_f3a23262e78813",
+  "parent": "sql_27f9c91d9268b7",
+  "schema": "public",
+  "startedAt": "2024-10-08T14:24:17.162237Z"
+}

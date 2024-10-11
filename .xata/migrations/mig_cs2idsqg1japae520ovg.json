@@ -1,0 +1,26 @@
+{
+  "done": true,
+  "migration": {
+    "name": "mig_cs2idsqg1japae520ovg",
+    "operations": [
+      {
+        "add_column": {
+          "table": "item-compare",
+          "column": {
+            "pk": false,
+            "name": "market_hash_name",
+            "type": "text",
+            "unique": false,
+            "comment": "",
+            "nullable": true
+          }
+        }
+      }
+    ]
+  },
+  "migrationType": "pgroll",
+  "name": "mig_cs2idsqg1japae520ovg",
+  "parent": "mig_cs2id6qg1japae520ot0",
+  "schema": "public",
+  "startedAt": "2024-10-08T12:35:00.367689Z"
+}

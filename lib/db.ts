@@ -1,13 +1,9 @@
-import { UserMessages } from '@/schemas/schema';
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
+import { XataClient } from "@/app/xata";
+import { drizzle } from "drizzle-orm/node-postgres";
+import pg from "pg";
 
-if (!process.env.DATABASE_URL) {
-    throw new Error('DATABASE_URL must be a Neon postgres connection string');
-}
+export const xata = new XataClient({ apiKey: process.env.XATA_API_KEY })
+const pool = new pg.Pool({ connectionString: xata.sql.connectionString, max: 20 });
+const db = drizzle(pool);
 
-const sql = neon(process.env.DATABASE_URL);
-
-export const db = drizzle(sql, {
-    schema: { UserMessages },
-});
+export { db };

@@ -7,27 +7,27 @@ const LanguageHandler = {
     }
 };
 
-const dopplerPhases = {
-    418: 'Phase 1',
-    419: 'Phase 2',
-    420: 'Phase 3',
-    421: 'Phase 4',
-    415: 'Ruby',
-    416: 'Sapphire',
-    417: 'Black Pearl',
-    569: 'Phase 1',
-    570: 'Phase 2',
-    571: 'Phase 3',
-    572: 'Phase 4',
-    568: 'Emerald',
-    618: 'Phase 2',
-    619: 'Sapphire',
-    617: 'Black Pearl',
-    852: 'Phase 1',
-    853: 'Phase 2',
-    854: 'Phase 3',
-    855: 'Phase 4'
-};
+// const dopplerPhases = {
+//     418: 'Phase 1',
+//     419: 'Phase 2',
+//     420: 'Phase 3',
+//     421: 'Phase 4',
+//     415: 'Ruby',
+//     416: 'Sapphire',
+//     417: 'Black Pearl',
+//     569: 'Phase 1',
+//     570: 'Phase 2',
+//     571: 'Phase 3',
+//     572: 'Phase 4',
+//     568: 'Emerald',
+//     618: 'Phase 2',
+//     619: 'Sapphire',
+//     617: 'Black Pearl',
+//     852: 'Phase 1',
+//     853: 'Phase 2',
+//     854: 'Phase 3',
+//     855: 'Phase 4'
+// };
 
 interface IItemParser {
 
@@ -112,6 +112,73 @@ class ItemParser implements IItemParser {
         return this.language[token.replace('#', '')];
     }
 
+    _getCases() {
+        const cases: { [key: string]: any } = {};
+
+        // Iterate over all items in itemsGame
+        for (const itemId of Object.keys(this.itemsGame.items)) {
+            const item = this.itemsGame.items[itemId];
+
+            // Check if the item is a case based on its prefab or other attributes
+            if (item.prefab && item.prefab === 'weapon_case') {
+                cases[itemId] = {
+                    name: this._getLanguageValue(item.item_name),
+                };
+            }
+        }
+        return cases;
+    }
+
+    _getStickerCapsules() {
+        const stickerCapusles: { [key: string]: any } = {};
+
+        // Iterate over all items in itemsGame
+        for (const itemId of Object.keys(this.itemsGame.items)) {
+            const item = this.itemsGame.items[itemId];
+
+            // Check if the item is a case based on its prefab or other attributes
+            if (item.prefab && item.prefab === 'sticker_capsule') {
+                stickerCapusles[itemId] = {
+                    name: this._getLanguageValue(item.item_name),
+                };
+            }
+        }
+        return stickerCapusles;
+    }
+
+    _getCapsules() {
+        const capsules: { [key: string]: any } = {};
+
+        for (const itemId of Object.keys(this.itemsGame.items)) {
+            const item = this.itemsGame.items[itemId];
+
+            // Check if item is categorized as a capsule (sticker, patch, graffiti, etc.)
+            if (this._isCapsule(item)) {
+                const capsuleName = this._getLanguageValue(item.item_name || item.description_tag);
+
+                capsules[itemId] = {
+                    name: capsuleName,
+                };
+            }
+        }
+
+        return capsules;
+    }
+
+    _isCapsule(item: any) {
+        // Check if the item prefab or name indicates it's a capsule
+        const isCapsuleByPrefab = item.prefab && (
+            item.prefab.includes('capsule') ||
+            item.prefab === 'sticker_capsule'
+        );
+
+        // Check by name or description tag (e.g., items that start with 'sticker_capsule')
+        const isCapsuleByName = item.item_name && item.item_name.toLowerCase().includes('capsule');
+        const isCapsuleByDescription = item.description_tag && item.description_tag.toLowerCase().includes('capsule');
+
+        return isCapsuleByPrefab || isCapsuleByName || isCapsuleByDescription;
+    }
+
     _getWeaponPaints(weaponName: string) {
         const paints: { [key: string]: { name: string, min: number, max: number } } = {};
 
@@ -129,9 +196,9 @@ class ItemParser implements IItemParser {
 
                 let name = this._getLanguageValue(kit.description_tag);
 
-                if (index in dopplerPhases) {
-                    name += ` (${dopplerPhases[parseInt(index) as keyof typeof dopplerPhases]})`;
-                }
+                // if (index in dopplerPhases) {
+                //     name += ` (${dopplerPhases[parseInt(index) as keyof typeof dopplerPhases]})`;
+                // }
 
                 paints[index] = {
                     name,
@@ -168,6 +235,12 @@ class ItemParser implements IItemParser {
 
         const weapons = this._getWeapons();
 
+        const cases = this._getCases();
+
+        // const stickerCapsules = this._getStickerCapsules();
+
+        const capsules = this._getCapsules();
+
         const weaponsResp: { [key: string]: any } = {};
 
         for (const defIndex of Object.keys(weapons)) {
@@ -195,6 +268,9 @@ class ItemParser implements IItemParser {
 
         resp.weapons = weaponsResp;
         resp.stickers = this.getStickers();
+        resp.cases = cases;
+        // resp.stickerCapsules = stickerCapsules;
+        resp.capsules = capsules;
 
         this.resp = resp;
 
