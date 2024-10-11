@@ -1,0 +1,78 @@
+{
+  "done": true,
+  "migration": {
+    "name": "mig_cs2k6f2mneklf4abihq0",
+    "operations": [
+      {
+        "set_replica_identity": {
+          "table": "items",
+          "identity": {
+            "type": "full",
+            "index": ""
+          }
+        }
+      },
+      {
+        "add_column": {
+          "up": "now()",
+          "table": "items",
+          "column": {
+            "name": "xata_updatedat",
+            "type": "timestamptz",
+            "default": "now()",
+            "nullable": false
+          }
+        }
+      },
+      {
+        "add_column": {
+          "table": "items",
+          "column": {
+            "name": "xata_id",
+            "type": "text",
+            "check": {
+              "name": "items_xata_id_length_xata_id",
+              "constraint": "length(\"xata_id\") < 256"
+            },
+            "unique": true,
+            "default": "'rec_' || xata_private.xid()",
+            "nullable": false
+          }
+        }
+      },
+      {
+        "add_column": {
+          "table": "items",
+          "column": {
+            "name": "xata_version",
+            "type": "integer",
+            "default": "0",
+            "nullable": false
+          }
+        }
+      },
+      {
+        "add_column": {
+          "table": "items",
+          "column": {
+            "name": "xata_createdat",
+            "type": "timestamptz",
+            "default": "now()",
+            "nullable": false
+          }
+        }
+      },
+      {
+        "sql": {
+          "up": "CREATE TRIGGER xata_maintain_metadata_trigger_pgroll\n  BEFORE INSERT OR UPDATE\n  ON \"items\"\n  FOR EACH ROW\n  EXECUTE FUNCTION xata_private.maintain_metadata_trigger_pgroll()",
+          "onComplete": true
+        }
+      }
+    ]
+  },
+  "migrationType": "pgroll",
+  "name": "mig_cs2k6f2mneklf4abihq0",
+  "parent": "mig_cs2k6cimneklf4abihp0",
+  "schema": "public",
+  "startedAt": "2024-10-08T14:35:41.310003Z"
+}

@@ -1,10 +1,12 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import NextAuth from "next-auth";
+import { NextRequest } from "next/server";
 import { TokenSet } from "openid-client";
 import { v4 as uuidv4 } from "uuid";
 
-export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-    return await NextAuth(req, res, {
+export const handler = async (req: NextRequest, res: any) => {
+    const apiReq = req as unknown as NextApiRequest;
+    return await NextAuth(apiReq, res, {
         providers: [
             {
                 id: "steam",
@@ -43,7 +45,7 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                     async request(ctx) {
                         const url = new URL(
                             req.url || "",
-                            `http://${req.headers.host}`,
+                            `http://${req.headers.get('host')}`,
                         );
                         if (
                             typeof url.searchParams.get("openid.claimed_id") ===

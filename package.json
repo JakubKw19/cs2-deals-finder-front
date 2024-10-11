@@ -10,8 +10,6 @@
     "type": "git",
     "url": "git+https://github.com/kop7er/nextjs-app-steam-auth.git"
   },
-  "license": "MIT",
-  "author": "kop7er",
   "scripts": {
     "build": "next build",
     "dev": "next dev",
@@ -20,8 +18,10 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.9.5",
+    "@xata.io/client": "^0.0.0-next.v403cdd55cb26b69c074dbc07b44daa0c2a0a77b6",
     "class-variance-authority": "^0.7.0",
     "drizzle-orm": "^0.33.0",
+    "fs": "^0.0.1-security",
     "lucide-react": "^0.445.0",
     "next": "14.0.1",
     "next-auth": "^4.24.7",
@@ -30,6 +30,7 @@
     "react": "^18",
     "react-dom": "^18",
     "react-icons": "^4.11.0",
+    "simple-vdf": "^1.1.1",
     "tailwind": "^4.0.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
@@ -47,7 +48,7 @@
     "eslint": "^8",
     "eslint-config-next": "14.0.1",
     "postcss": "^8",
-    "prettier": "3.3.3",
+    "prettier": "^3.3.3",
     "tailwindcss": "^3",
     "typescript": "^5"
   }
