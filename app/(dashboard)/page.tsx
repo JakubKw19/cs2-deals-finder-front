@@ -1,10 +1,18 @@
+'use client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { File, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import useSWR from 'swr';
+import { marketPriceForDB } from '@/types/servertypes/marketPrices';
+import { columnsArg } from './columns';
+import { DataTable } from './data-table';
 // import { ProductsTable } from './products-table';
 // import { getProducts } from '@/lib/db';
 
-export default async function ProductsPage({
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+
+export default function ProductsPage({
     searchParams
 }: {
     searchParams: { q: string; offset: string };
@@ -15,6 +23,9 @@ export default async function ProductsPage({
     //   search,
     //   Number(offset)
     // );
+    const { data, isLoading, error } = useSWR<marketPriceForDB[]>('/api/allMarket', fetcher, {
+        refreshInterval: 300000, // 5 minutes in milliseconds
+    });
 
     return (
         <Tabs defaultValue="all">
@@ -43,6 +54,15 @@ export default async function ProductsPage({
                 </div>
             </div>
             <TabsContent value="all">
+                {
+                    isLoading ? <div>Loading...</div> :
+                        error ? <div>Error loading products</div> :
+                            data &&
+                            <div>
+                                <DataTable columns={columnsArg("Csfloat", "Buff163")} data={data} />
+
+                            </div>
+                }
                 {/* <ProductsTable
           products={products}
           offset={newOffset ?? 0}
