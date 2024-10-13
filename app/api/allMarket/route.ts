@@ -9,7 +9,6 @@ export async function GET() {
     if (!result) {
         return NextResponse.error();
     }
-    console.log(result);
     // let newData: displayedMarketPrice[] = [];
     const data = result as unknown as marketPriceForDB[];
     const newData = data.map((item: marketPriceForDB) => {
@@ -18,7 +17,7 @@ export async function GET() {
             id: item.id,
             market_hash_name: item.market_hash_name,
             buff163buy: typeof item.buff163Price?.highest_order?.price === 'number' ? item.buff163Price.highest_order.price : null,
-            buff163sell: typeof item.buff163Price?.startingAt?.price === 'number' ? item.buff163Price.startingAt.price : null,
+            buff163sell: typeof item.buff163Price?.starting_at?.price === 'number' ? item.buff163Price.starting_at.price : null,
             steam24h: typeof item.steamPrice?.last_24h === 'number' ? item.steamPrice.last_24h : null,
             steam7d: typeof item.steamPrice?.last_7d === 'number' ? item.steamPrice.last_7d : null,
             steam30d: typeof item.steamPrice?.last_30d === 'number' ? item.steamPrice.last_30d : null,

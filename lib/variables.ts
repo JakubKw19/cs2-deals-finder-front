@@ -1,0 +1,17 @@
+export const marketNames = {
+    steam24h: 'steam24h',
+    steam7d: 'steam7d',
+    steam30d: 'steam30d',
+    buff163buy: 'buff163buy',
+    buff163sell: 'buff163sell',
+    bitskins: 'bitskins',
+    skinport: 'skinport',
+    csmoney: 'csmoney',
+    csfloat: 'csfloat',
+    csgotrader: 'csgotrader',
+    lootfarm: 'lootfarm',
+    csgoempire: 'csgoempire',
+    youpin: 'youpin',
+    swapgg: 'swapgg',
+    csgotm: 'csgotm',
+}

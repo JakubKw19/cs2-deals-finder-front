@@ -25,6 +25,14 @@ export const columnsArg = (marketBuyName: string, marketSellName: string) => {
             accessorKey: "marketSell",
             header: marketSellName,
         },
+        {
+            accessorKey: "differencePercent",
+            header: "Diffrence %",
+        },
+        {
+            accessorKey: "differenceProfit",
+            header: "Diffrence Profit",
+        }
     ]
 }
 
