@@ -46,7 +46,7 @@ export type steamPrice = {
 } | null;
 
 export type buff163Price = {
-    startingAt: {
+    starting_at: {
         price: number;
         doppler?: doppler;
     }

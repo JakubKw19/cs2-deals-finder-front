@@ -23,4 +23,6 @@ export type displayedPreviewPrices = {
     market_hash_name: string;
     marketBuy: number | null;
     marketSell: number | null;
+    diffrencePercent: number | null;
+    diffrenceProfit: number | null;
 }
