@@ -1,6 +1,0 @@
-{
-  "databaseURL": "https://Jakub-Kwiecie-s-workspace-co0708.eu-central-1.xata.sh/db/item-tracker",
-  "codegen": {
-    "output": "src/xata.ts"
-  }
-}
