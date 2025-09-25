@@ -34,6 +34,81 @@ type Item = {
   note?: string;
 };
 
+const config = {
+  columns: [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected()
+              ? true
+              : table.getIsSomePageRowsSelected()
+                ? "indeterminate"
+                : false
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+    },
+    {
+      header: "Name",
+      accessorKey: "name",
+      cell: ({ row }) => (
+        <div className="font-medium">{row.getValue("name")}</div>
+      ),
+    },
+    {
+      header: "Email",
+      accessorKey: "email",
+    },
+    {
+      header: "Location",
+      accessorKey: "location",
+      cell: ({ row }) => (
+        <div>
+          <span className="text-lg leading-none">{row.original.flag}</span>{" "}
+          {row.getValue("location")}
+        </div>
+      ),
+    },
+    {
+      header: "Status",
+      accessorKey: "status",
+      cell: ({ row }) => (
+        <Badge
+          className={cn(
+            row.getValue("status") === "Inactive" &&
+              "bg-muted-foreground/60 text-primary-foreground",
+          )}
+        >
+          {row.getValue("status")}
+        </Badge>
+      ),
+    },
+    {
+      header: () => <div className="text-right">Balance</div>,
+      accessorKey: "balance",
+      cell: ({ row }) => {
+        const amount = parseFloat(row.getValue("balance"));
+        const formatted = new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        }).format(amount);
+        return <div className="text-right">{formatted}</div>;
+      },
+    },
+  ],
+};
+
 const columns: ColumnDef<Item>[] = [
   {
     id: "expander",
@@ -68,76 +143,7 @@ const columns: ColumnDef<Item>[] = [
         </Button>
       ) : undefined;
     },
-  },
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected()
-            ? true
-            : table.getIsSomePageRowsSelected()
-              ? "indeterminate"
-              : false
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-  },
-  {
-    header: "Name",
-    accessorKey: "name",
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("name")}</div>
-    ),
-  },
-  {
-    header: "Email",
-    accessorKey: "email",
-  },
-  {
-    header: "Location",
-    accessorKey: "location",
-    cell: ({ row }) => (
-      <div>
-        <span className="text-lg leading-none">{row.original.flag}</span>{" "}
-        {row.getValue("location")}
-      </div>
-    ),
-  },
-  {
-    header: "Status",
-    accessorKey: "status",
-    cell: ({ row }) => (
-      <Badge
-        className={cn(
-          row.getValue("status") === "Inactive" &&
-            "bg-muted-foreground/60 text-primary-foreground"
-        )}
-      >
-        {row.getValue("status")}
-      </Badge>
-    ),
-  },
-  {
-    header: () => <div className="text-right">Balance</div>,
-    accessorKey: "balance",
-    cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("balance"));
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount);
-      return <div className="text-right">{formatted}</div>;
-    },
+    ...config,
   },
 ];
 
@@ -147,7 +153,7 @@ export default function ItemTable() {
   useEffect(() => {
     async function fetchPosts() {
       const res = await fetch(
-        "https://raw.githubusercontent.com/origin-space/origin-images/refs/heads/main/users-01_fertyx.json"
+        "https://raw.githubusercontent.com/origin-space/origin-images/refs/heads/main/users-01_fertyx.json",
       );
       const data = await res.json();
       setData(data.slice(0, 5)); // Limit to 5 items
@@ -176,7 +182,7 @@ export default function ItemTable() {
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 );
@@ -199,7 +205,7 @@ export default function ItemTable() {
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -230,17 +236,6 @@ export default function ItemTable() {
           )}
         </TableBody>
       </Table>
-      <p className="text-muted-foreground mt-4 text-center text-sm">
-        Expanding sub-row made with{" "}
-        <a
-          className="hover:text-foreground underline"
-          href="https://tanstack.com/table"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          TanStack Table
-        </a>
-      </p>
     </div>
   );
 }

@@ -3,12 +3,12 @@ import { useSession } from "next-auth/react";
 import ItemTable from "./ItemTable";
 
 export default function Page() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   // If session is loading, you can show a loading indicator
-  // if (session === 'loading') {
-  //     return <div>Loading...</div>;
-  // }
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
 
   // If there is no session, you might want to handle that case
   if (!session) {

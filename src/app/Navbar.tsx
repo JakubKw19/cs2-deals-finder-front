@@ -11,7 +11,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import ThemeToggle from "./theme-toggle";
-
+import { useSession } from "next-auth/react";
+import UserMenu from "@/components/user-menu";
+import { auth } from "@/lib/auth";
+import { useEffect } from "react";
+import { getServerSession } from "next-auth";
+import { authConfig } from "@/lib/auth.config";
 // Navigation links array to be used in both desktop and mobile menus
 const navigationLinks = [
   { href: "/home", label: "Home", active: true },
@@ -20,7 +25,8 @@ const navigationLinks = [
   { href: "#", label: "About" },
 ];
 
-export default function Navbar() {
+export default async function Navbar() {
+  const session = await getServerSession(authConfig);
   return (
     <header className="border-b px-4 md:px-6">
       <div className="flex h-16 justify-between gap-4">
@@ -103,9 +109,13 @@ export default function Navbar() {
         {/* Right side */}
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Button asChild size="sm" className="text-sm">
-            <a href="/login">Sign In</a>
-          </Button>
+          {session ? (
+            <UserMenu user={session.user} />
+          ) : (
+            <Button asChild size="sm" className="text-sm">
+              <a href="/login">Sign In</a>
+            </Button>
+          )}
           {/* <Button asChild size="sm" className="text-sm">
             <a href="#">Get Started</a>
           </Button> */}
