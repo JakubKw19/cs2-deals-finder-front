@@ -1,8 +1,10 @@
 "use client";
 import { useSession } from "next-auth/react";
 import ItemTable from "./ItemTable";
+import { trpc } from "@/utils/trpc";
 
 export default function Page() {
+  const sortedItems = trpc.sorting.sortPrices.useQuery({ type: "blue" });
   const { data: session, status } = useSession();
 
   // If session is loading, you can show a loading indicator
@@ -26,6 +28,9 @@ export default function Page() {
   return (
     <div>
       <ItemTable />
+      {sortedItems.isLoading && <p>Loading prices...</p>}
+      {sortedItems.error && <p>Error: {sortedItems.error.message}</p>}
+      {sortedItems && <pre>{JSON.stringify(sortedItems, null, 2)}</pre>}
     </div>
   );
 }

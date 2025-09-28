@@ -3,10 +3,10 @@ import { NextApiRequest } from "next";
 // import { NextApiRequest, NextApiResponse } from "next";
 import { NextRequest } from "next/server";
 
-export async function GET(req: NextRequest, res: NextRequest) {
+export async function GET(req: NextRequest, res) {
   return handler(req, res);
 }
 
-export async function POST(req: NextRequest, res: NextRequest) {
+export async function POST(req: NextRequest, res) {
   return handler(req, res);
 }

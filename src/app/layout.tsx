@@ -1,6 +1,7 @@
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import Navbar from "./Navbar";
+import { Providers } from "./providers";
 
 export const metadata = {
   title: "Next.js",
@@ -15,15 +16,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Navbar />
-          <div className="m-auto max-w-7xl p-10">{children}</div>
-        </ThemeProvider>
+        <Providers>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Navbar />
+            <div className="m-auto max-w-7xl p-10">{children}</div>
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
