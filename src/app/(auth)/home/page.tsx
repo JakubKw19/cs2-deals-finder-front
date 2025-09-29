@@ -30,7 +30,9 @@ export default function Page() {
       <ItemTable />
       {sortedItems.isLoading && <p>Loading prices...</p>}
       {sortedItems.error && <p>Error: {sortedItems.error.message}</p>}
-      {sortedItems && <pre>{JSON.stringify(sortedItems, null, 2)}</pre>}
+      {sortedItems.data && (
+        <pre>{JSON.stringify(sortedItems.data, null, 2)}</pre>
+      )}
     </div>
   );
 }

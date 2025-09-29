@@ -1,3 +1,4 @@
+import { projectConfig } from "@/config";
 import { NextAuthOptions } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
 
@@ -18,8 +19,8 @@ export const authConfig = {
         params: {
           "openid.ns": "http://specs.openid.net/auth/2.0",
           "openid.mode": "checkid_setup",
-          "openid.return_to": `${process.env.NEXTAUTH_URL}/api/auth/callback/steam`,
-          "openid.realm": `${process.env.NEXTAUTH_URL}/api/auth/callback/steam`,
+          "openid.return_to": `${projectConfig.nextauth_url}/api/auth/callback/steam`,
+          "openid.realm": `${projectConfig.nextauth_url}/api/auth/callback/steam`,
           "openid.identity":
             "http://specs.openid.net/auth/2.0/identifier_select",
           "openid.claimed_id":

@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { authConfig } from "./auth.config";
 import { NextRequest } from "next/server";
 import { NextApiRequest } from "next";
+import { projectConfig } from "@/config";
 
 // The configuration object type is NextAuthConfig for the new v5 structure
 
@@ -17,8 +18,8 @@ export const { auth } = await NextAuth({
         params: {
           "openid.ns": "http://specs.openid.net/auth/2.0",
           "openid.mode": "checkid_setup",
-          "openid.return_to": `${process.env.NEXTAUTH_URL}/api/auth/callback/steam`,
-          "openid.realm": `${process.env.NEXTAUTH_URL}/api/auth/callback/steam`,
+          "openid.return_to": `${projectConfig.nextauth_url}/api/auth/callback/steam`,
+          "openid.realm": `${projectConfig.nextauth_url}/api/auth/callback/steam`,
           "openid.identity":
             "http://specs.openid.net/auth/2.0/identifier_select",
           "openid.claimed_id":
@@ -120,8 +121,8 @@ export const handler = async (req: NextRequest, res: any) => {
           params: {
             "openid.ns": "http://specs.openid.net/auth/2.0",
             "openid.mode": "checkid_setup",
-            "openid.return_to": `${process.env.NEXTAUTH_URL}/api/auth/callback/steam`,
-            "openid.realm": `${process.env.NEXTAUTH_URL}/api/auth/callback/steam`,
+            "openid.return_to": `${projectConfig.nextauth_url}/api/auth/callback/steam`,
+            "openid.realm": `${projectConfig.nextauth_url}/api/auth/callback/steam`,
             "openid.identity":
               "http://specs.openid.net/auth/2.0/identifier_select",
             "openid.claimed_id":
