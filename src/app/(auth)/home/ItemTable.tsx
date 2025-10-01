@@ -1,19 +1,32 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import * as React from "react";
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getExpandedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
-import { ChevronDownIcon, ChevronUpIcon, InfoIcon } from "lucide-react";
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -22,220 +35,344 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { SortedItemsOutput } from "./page";
 
-type Item = {
-  id: string;
-  name: string;
-  email: string;
-  location: string;
-  flag: string;
-  status: "Active" | "Inactive" | "Pending";
-  balance: number;
-  note?: string;
-};
+import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 
-const config = {
-  columns: [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected()
-              ? true
-              : table.getIsSomePageRowsSelected()
-                ? "indeterminate"
-                : false
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      ),
-    },
-    {
-      header: "Name",
-      accessorKey: "name",
-      cell: ({ row }) => (
-        <div className="font-medium">{row.getValue("name")}</div>
-      ),
-    },
-    {
-      header: "Email",
-      accessorKey: "email",
-    },
-    {
-      header: "Location",
-      accessorKey: "location",
-      cell: ({ row }) => (
-        <div>
-          <span className="text-lg leading-none">{row.original.flag}</span>{" "}
-          {row.getValue("location")}
-        </div>
-      ),
-    },
-    {
-      header: "Status",
-      accessorKey: "status",
-      cell: ({ row }) => (
-        <Badge
-          className={cn(
-            row.getValue("status") === "Inactive" &&
-              "bg-muted-foreground/60 text-primary-foreground",
-          )}
-        >
-          {row.getValue("status")}
-        </Badge>
-      ),
-    },
-    {
-      header: () => <div className="text-right">Balance</div>,
-      accessorKey: "balance",
-      cell: ({ row }) => {
-        const amount = parseFloat(row.getValue("balance"));
-        const formatted = new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(amount);
-        return <div className="text-right">{formatted}</div>;
-      },
-    },
-  ],
-};
+type SingleItem = SortedItemsOutput[number];
 
-const columns: ColumnDef<Item>[] = [
+export const columns: ColumnDef<SingleItem>[] = [
+  // {
+  //   id: "select",
+  //   header: ({ table }) => (
+  //     <Checkbox
+  //       checked={
+  //         table.getIsAllPageRowsSelected()
+  //           ? true
+  //           : table.getIsSomePageRowsSelected()
+  //             ? "indeterminate"
+  //             : false
+  //       }
+  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+  //       aria-label="Select all"
+  //     />
+  //   ),
+  //   cell: ({ row }) => (
+  //     <Checkbox
+  //       checked={row.getIsSelected()}
+  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
+  //       aria-label="Select row"
+  //     />
+  //   ),
+  //   enableSorting: false,
+  //   enableHiding: false,
+  // },
   {
-    id: "expander",
-    header: () => null,
+    accessorKey: "market_hash_name",
+    header: "Market name",
+    cell: ({ row }) => (
+      <div className="text-left capitalize">
+        {row.getValue("market_hash_name")}
+      </div>
+    ),
+  },
+  {
+    id: "steamDetails.price",
+    accessorFn: (row) => row.steamDetails?.price,
+    header: "Steam price",
     cell: ({ row }) => {
-      return row.getCanExpand() ? (
-        <Button
-          {...{
-            className: "size-7 shadow-none text-muted-foreground",
-            onClick: row.getToggleExpandedHandler(),
-            "aria-expanded": row.getIsExpanded(),
-            "aria-label": row.getIsExpanded()
-              ? `Collapse details for ${row.original.name}`
-              : `Expand details for ${row.original.name}`,
-            size: "icon",
-            variant: "ghost",
-          }}
-        >
-          {row.getIsExpanded() ? (
-            <ChevronUpIcon
-              className="opacity-60"
-              size={16}
-              aria-hidden="true"
-            />
-          ) : (
-            <ChevronDownIcon
-              className="opacity-60"
-              size={16}
-              aria-hidden="true"
-            />
-          )}
-        </Button>
-      ) : undefined;
+      const amount = parseFloat(row.getValue("steamDetails.price"));
+      // Format the amount as a dollar amount
+      const formatted = new Intl.NumberFormat("de-DE", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount);
+      return <div className="lowercase">{formatted}</div>;
     },
-    ...config,
+  },
+  {
+    id: "csfloatDetails.price",
+    accessorFn: (row) => row.csfloatDetails?.price,
+    header: "CsFloat price",
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("csfloatDetails.price"));
+      // Format the amount as a dollar amount
+      const formatted = new Intl.NumberFormat("de-DE", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount);
+      return <div className="lowercase">{formatted}</div>;
+    },
+  },
+  {
+    id: "skinsMonkeyDetails.price",
+    accessorFn: (row) => row.skinsMonkeyDetails?.price,
+    header: "SkinsMonkey price",
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("skinsMonkeyDetails.price"));
+      // Format the amount as a dollar amount
+      const formatted = new Intl.NumberFormat("de-DE", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount);
+      return <div className="lowercase">{formatted}</div>;
+    },
+  },
+  {
+    id: "skinsMonkeyDetails.stickersPrice",
+    accessorFn: (row) => row.skinsMonkeyDetails?.stickersPrice,
+    header: "Stickers Price",
+    cell: ({ row }) => {
+      const amount = parseFloat(
+        row.getValue("skinsMonkeyDetails.stickersPrice"),
+      );
+      // Format the amount as a dollar amount
+      const formatted = new Intl.NumberFormat("de-DE", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount);
+      return <div className="lowercase">{formatted}</div>;
+    },
+  },
+  {
+    accessorKey: "steamMultiplyer",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          steamMultiplyer
+          <ArrowUpDown />
+        </Button>
+      );
+    },
+    cell: ({ row }) => (
+      <div className="lowercase">
+        {Number(row.getValue("steamMultiplyer")).toPrecision(4)}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "csfloatMultiplyer",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          className="m-0 p-0"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          csfloatMultiplyer
+          <ArrowUpDown />
+        </Button>
+      );
+    },
+    cell: ({ row }) => (
+      <div className="lowercase">
+        {Number(row.getValue("csfloatMultiplyer")).toPrecision(4)}
+      </div>
+    ),
+  },
+  {
+    id: "actions",
+    enableHiding: false,
+    cell: ({ row }) => {
+      const payment = row.original;
+      return (
+        // <Button
+        //   variant="ghost"
+        //   className="m-0 p-0"
+        //   onClick={() => row.toggleExpanded()}
+        // >
+        row.getIsExpanded() ? <IoIosArrowUp /> : <IoIosArrowDown />
+        // </Button>
+      );
+      // return (
+      //   <DropdownMenu>
+      //     <DropdownMenuTrigger asChild>
+      //       <Button variant="ghost" className="h-8 w-8 p-0">
+      //         <span className="sr-only">Open menu</span>
+      //         <MoreHorizontal />
+      //       </Button>
+      //     </DropdownMenuTrigger>
+      //     <DropdownMenuContent align="end">
+      //       <DropdownMenuLabel>Actions</DropdownMenuLabel>
+      //       {/* <DropdownMenuItem
+      //         onClick={() => navigator.clipboard.writeText(payment.id)}
+      //       >
+      //         Copy payment ID
+      //       </DropdownMenuItem> */}
+      //       <DropdownMenuSeparator />
+      //       <DropdownMenuItem>View customer</DropdownMenuItem>
+      //       <DropdownMenuItem>View payment details</DropdownMenuItem>
+      //     </DropdownMenuContent>
+      //   </DropdownMenu>
+      // );
+    },
   },
 ];
 
-export default function ItemTable() {
-  const [data, setData] = useState<Item[]>([]);
-
-  useEffect(() => {
-    async function fetchPosts() {
-      const res = await fetch(
-        "https://raw.githubusercontent.com/origin-space/origin-images/refs/heads/main/users-01_fertyx.json",
-      );
-      const data = await res.json();
-      setData(data.slice(0, 5)); // Limit to 5 items
-    }
-    fetchPosts();
-  }, []);
+export default function ItemTable({ data }: { data: SortedItemsOutput }) {
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    [],
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
     data,
     columns,
-    getRowCanExpand: (row) => Boolean(row.original.note),
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
   });
 
   return (
-    <div>
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="hover:bg-transparent">
-              {headerGroup.headers.map((header) => {
+    <div className="w-full">
+      <div className="flex items-center py-4">
+        {/* <Input
+          placeholder="Filter emails..."
+          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("email")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        /> */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="ml-auto">
+              Columns <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => {
                 return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
                 );
               })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <Fragment key={row.id}>
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className="whitespace-nowrap [&:has([aria-expanded])]:w-px [&:has([aria-expanded])]:py-0 [&:has([aria-expanded])]:pr-0"
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-                {row.getIsExpanded() && (
-                  <TableRow>
-                    <TableCell colSpan={row.getVisibleCells().length}>
-                      <div className="text-primary/80 flex items-start py-2">
-                        <span
-                          className="me-3 mt-0.5 flex w-7 shrink-0 justify-center"
-                          aria-hidden="true"
-                        >
-                          <InfoIcon className="opacity-60" size={16} />
-                        </span>
-                        <p className="text-sm">{row.original.note}</p>
-                      </div>
-                    </TableCell>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <div className="overflow-hidden rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <React.Fragment key={row.id}>
+                  <TableRow
+                    data-state={row.getIsSelected() && "selected"}
+                    onClick={() => row.toggleExpanded()}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="p-4 text-center">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
                   </TableRow>
-                )}
-              </Fragment>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+                  {row.getIsExpanded() && (
+                    <TableRow>
+                      {/* The second row's cell must span the full width of the table
+                  using colSpan.
+                */}
+                      <TableCell colSpan={row.getVisibleCells().length}>
+                        <div className="bg-gray-50 p-4 dark:bg-gray-800">
+                          {/* Replace with your actual row details */}
+                          <h4 className="mb-2 font-semibold">
+                            Details for Row {row.id}
+                          </h4>
+                          <p>
+                            This is the full-width content that expands and
+                            collapses with the main row.
+                          </p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <div className="text-muted-foreground flex-1 text-sm">
+          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
+        </div>
+        <div className="space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

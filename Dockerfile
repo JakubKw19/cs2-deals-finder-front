@@ -2,39 +2,44 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Enable corepack for pnpm
 RUN corepack enable
 
-# Copy monorepo manifests first (better caching)
+# Copy manifests
 COPY pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY frontend-next/package.json ./frontend-next/
 COPY backend/package.json ./backend/
-COPY packages/*/package.json ./packages/*/
 
-# Install all workspace dependencies
+# Install all deps (cached)
 RUN pnpm install --frozen-lockfile
 
-# Copy all source code
+# Copy source
 COPY . .
 
-# Build the frontend
+# Build frontend
 RUN pnpm --filter frontend-next build
 
-# Stage 2: Production runner
+# Stage 2: Runner
 FROM node:20-alpine AS runner
-WORKDIR /app/frontend-next
+WORKDIR /app
 ENV NODE_ENV=production
 
 RUN corepack enable
 
-# Copy built artifacts
-COPY --from=builder /app/frontend-next/.next .next
-COPY --from=builder /app/frontend-next/public ./public
-COPY --from=builder /app/frontend-next/package.json ./
-COPY --from=builder /app/packages ../packages
+# Copy production node_modules (pruned)
+COPY --from=builder /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
 
-# Install only production deps
-RUN pnpm install --frozen-lockfile --prod --link-workspace-packages
+COPY --from=builder /app/node_modules/ ./node_modules/
+
+COPY --from=builder /app/packages ./packages
+
+# Copy built app
+COPY --from=builder /app/frontend-next/package.json ./frontend-next/
+COPY --from=builder /app/frontend-next/.next ./frontend-next/.next
+COPY --from=builder /app/frontend-next/public ./frontend-next/public
+
+WORKDIR /app/frontend-next
+
+RUN pnpm install --frozen-lockfile
 
 EXPOSE 3000
 CMD ["pnpm", "start"]
