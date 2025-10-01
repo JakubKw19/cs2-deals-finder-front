@@ -1,7 +1,8 @@
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
 import Navbar from "./Navbar";
 import { Providers } from "./providers";
+import ClientWrapper from "./ClientWrapper";
+import ThemeProvider from "@/components/theme-provider";
 
 export const metadata = {
   title: "Next.js",
@@ -24,7 +25,9 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <Navbar />
-            <div className="m-auto max-w-7xl p-10">{children}</div>
+            <ClientWrapper>
+              <div className="m-auto max-w-7xl p-10">{children}</div>
+            </ClientWrapper>
           </ThemeProvider>
         </Providers>
       </body>

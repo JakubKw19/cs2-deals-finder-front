@@ -17,16 +17,18 @@ import { auth } from "@/lib/auth";
 import { useEffect } from "react";
 import { getServerSession } from "next-auth";
 import { authConfig } from "@/lib/auth.config";
+import { headers } from "next/headers";
 // Navigation links array to be used in both desktop and mobile menus
 const navigationLinks = [
-  { href: "/home", label: "Home", active: true },
-  { href: "#", label: "Features" },
-  { href: "#", label: "Pricing" },
-  { href: "#", label: "About" },
+  { href: "/home", label: "Home" },
+  { href: "/settings", label: "Settings" },
 ];
 
 export default async function Navbar() {
   const session = await getServerSession(authConfig);
+  const headersList = headers();
+  const pathname = (await headersList).get("x-pathname") || "";
+  console.log(pathname);
   return (
     <header className="border-b px-4 md:px-6">
       <div className="flex h-16 justify-between gap-4">
@@ -72,7 +74,7 @@ export default async function Navbar() {
                         <NavigationMenuLink
                           href={link.href}
                           className="py-1.5"
-                          active={link.active}
+                          active={pathname === link.href}
                         >
                           {link.label}
                         </NavigationMenuLink>
@@ -85,8 +87,9 @@ export default async function Navbar() {
           </div>
           {/* Main nav */}
           <div className="flex items-center gap-6">
-            <a href="#" className="text-primary hover:text-primary/90">
+            <a href="/" className="text-primary hover:text-primary/90">
               {/* <Logo /> */}
+              CS2-DEALS-FINDER
             </a>
             {/* Navigation menu */}
             <NavigationMenu className="h-full *:h-full max-md:hidden">
@@ -94,7 +97,7 @@ export default async function Navbar() {
                 {navigationLinks.map((link, index) => (
                   <NavigationMenuItem key={index} className="h-full">
                     <NavigationMenuLink
-                      active={link.active}
+                      active={pathname === link.href}
                       href={link.href}
                       className="text-muted-foreground hover:text-primary border-b-primary hover:border-b-primary data-[active]:border-b-primary h-full justify-center rounded-none border-y-2 border-transparent py-1.5 font-medium hover:bg-transparent data-[active]:bg-transparent!"
                     >
