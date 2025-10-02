@@ -30,7 +30,7 @@ export default async function Navbar() {
   const pathname = (await headersList).get("x-pathname") || "";
   console.log(pathname);
   return (
-    <header className="border-b px-4 md:px-6">
+    <header className="fixed z-50 w-full border-b px-4 shadow-xl backdrop-blur-xl md:px-6">
       <div className="flex h-16 justify-between gap-4">
         {/* Left side */}
         <div className="flex gap-2">
@@ -87,7 +87,7 @@ export default async function Navbar() {
           </div>
           {/* Main nav */}
           <div className="flex items-center gap-6">
-            <a href="/" className="text-primary hover:text-primary/90">
+            <a href="/" className="text-primary hover:text-primary/90 text-xl">
               {/* <Logo /> */}
               CS2-DEALS-FINDER
             </a>
@@ -99,7 +99,7 @@ export default async function Navbar() {
                     <NavigationMenuLink
                       active={pathname === link.href}
                       href={link.href}
-                      className="text-muted-foreground hover:text-primary border-b-primary hover:border-b-primary data-[active]:border-b-primary h-full justify-center rounded-none border-y-2 border-transparent py-1.5 font-medium hover:bg-transparent data-[active]:bg-transparent!"
+                      className="hover:text-primary border-b-primary hover:border-b-primary data-[active]:border-b-primary text-md h-full justify-center rounded-none border-y-2 border-transparent py-1.5 font-medium hover:bg-transparent data-[active]:bg-transparent!"
                     >
                       {link.label}
                     </NavigationMenuLink>

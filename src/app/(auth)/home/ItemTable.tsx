@@ -68,6 +68,22 @@ export const columns: ColumnDef<SingleItem>[] = [
   //   enableHiding: false,
   // },
   {
+    id: "img",
+    accessorFn: (row) => row.skinsMonkeyDetails.imageUrl,
+    header: "",
+    cell: ({ row }) => {
+      return (
+        <div className="flex w-20 justify-center">
+          <img
+            className="h-10"
+            src={row.getValue("img")}
+            alt={row.getValue("img")}
+          />
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: "market_hash_name",
     header: "Market name",
     cell: ({ row }) => (
