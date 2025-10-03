@@ -36,8 +36,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SortedItemsOutput } from "./page";
-
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
+import { FaSteam } from "react-icons/fa";
+import SkinsmonkeyJPG from "@/../public/skinsmonkey.jpg";
+import csfloatPNG from "@/../public/csfloat.png";
 
 type SingleItem = SortedItemsOutput[number];
 
@@ -158,14 +160,14 @@ export const columns: ColumnDef<SingleItem>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          steamMultiplyer
+          Steam
           <ArrowUpDown />
         </Button>
       );
     },
     cell: ({ row }) => (
       <div className="lowercase">
-        {Number(row.getValue("steamMultiplyer")).toPrecision(4)}
+        {Number(row.getValue("steamMultiplyer")).toPrecision(4)} %
       </div>
     ),
   },
@@ -178,14 +180,122 @@ export const columns: ColumnDef<SingleItem>[] = [
           className="m-0 p-0"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          csfloatMultiplyer
+          Csfloat
           <ArrowUpDown />
         </Button>
       );
     },
     cell: ({ row }) => (
       <div className="lowercase">
-        {Number(row.getValue("csfloatMultiplyer")).toPrecision(4)}
+        {Number(row.getValue("csfloatMultiplyer")).toPrecision(4)} %
+      </div>
+    ),
+  },
+  {
+    accessorKey: "buffAddedStickerMultiplyer",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          className="m-0 p-0"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Added Stck
+          <ArrowUpDown />
+        </Button>
+      );
+    },
+    cell: ({ row }) => (
+      <div className="lowercase">
+        {Number(row.getValue("buffAddedStickerMultiplyer")).toPrecision(4)} %
+      </div>
+    ),
+  },
+  {
+    id: "overstock",
+    accessorFn: (row) => row.skinsMonkeyDetails.overstock,
+    header: "Stock",
+    cell: ({ row }) => {
+      return (
+        <div className="lowercase">
+          {
+            (
+              row.getValue("overstock") as {
+                limit: number;
+                available: number;
+                stock: number;
+              }
+            ).stock
+          }
+          /
+          {
+            (
+              row.getValue("overstock") as {
+                limit: number;
+                available: number;
+              }
+            ).limit
+          }
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "links",
+    header: "Links",
+    accessorFn: (row) => row.links,
+    cell: ({ row }) => (
+      <div className="flex h-10 w-25 gap-1">
+        <a
+          href={
+            (
+              row.getValue("links") as {
+                steam: string;
+                skinsmonkey: string;
+                csfloat: string;
+              }
+            ).steam
+          }
+          target="_blank"
+        >
+          <FaSteam className="h-8 w-8" />
+        </a>
+        <a
+          href={
+            (
+              row.getValue("links") as {
+                steam: string;
+                skinsmonkey: string;
+                csfloat: string;
+              }
+            ).skinsmonkey
+          }
+          target="_blank"
+        >
+          <img
+            className="h-8 w-8 rounded-full"
+            src={SkinsmonkeyJPG.src}
+            alt="skinsmoneky"
+          />
+        </a>
+        <a
+          href={
+            (
+              row.getValue("links") as {
+                steam: string;
+                skinsmonkey: string;
+                csfloat: string;
+              }
+            ).csfloat
+          }
+          target="_blank"
+        >
+          <img
+            className="h-8 w-8 rounded-full"
+            src={csfloatPNG.src}
+            alt="csfloat"
+          />
+        </a>
       </div>
     ),
   },
@@ -228,7 +338,13 @@ export const columns: ColumnDef<SingleItem>[] = [
   },
 ];
 
-export default function ItemTable({ data }: { data: SortedItemsOutput }) {
+export default function ItemTable({
+  data,
+  isLoading,
+}: {
+  data: SortedItemsOutput;
+  isLoading: boolean;
+}) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -257,16 +373,8 @@ export default function ItemTable({ data }: { data: SortedItemsOutput }) {
   });
 
   return (
-    <div className="w-full">
-      <div className="flex items-center py-4">
-        {/* <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        /> */}
+    <div className="h-5/6 w-full">
+      <div className="mb-2 flex items-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
@@ -294,100 +402,119 @@ export default function ItemTable({ data }: { data: SortedItemsOutput }) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="overflow-hidden rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <React.Fragment key={row.id}>
-                  <TableRow
-                    data-state={row.getIsSelected() && "selected"}
-                    onClick={() => row.toggleExpanded()}
+      <div className="h-full">
+        <div className="h-9/10 overflow-y-auto rounded-md border">
+          <Table className="shadow-m relative h-full w-full">
+            <TableHeader className="glass-s sticky top-0 z-20">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            {isLoading ? (
+              <TableBody className="glass h-full">
+                <TableRow className="h-full">
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-full w-full text-center"
                   >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="p-4 text-center">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  {row.getIsExpanded() && (
-                    <TableRow>
-                      {/* The second row's cell must span the full width of the table
+                    Loading
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            ) : (
+              // <div className="h-full w-full overflow-y-auto">
+              <TableBody className="glass">
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <React.Fragment key={row.id}>
+                      <TableRow
+                        data-state={row.getIsSelected() && "selected"}
+                        onClick={() => row.toggleExpanded()}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id} className="p-2 text-center">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                      {row.getIsExpanded() && (
+                        <TableRow>
+                          {/* The second row's cell must span the full width of the table
                   using colSpan.
                 */}
-                      <TableCell colSpan={row.getVisibleCells().length}>
-                        <div className="bg-gray-50 p-4 dark:bg-gray-800">
-                          {/* Replace with your actual row details */}
-                          <h4 className="mb-2 font-semibold">
-                            Details for Row {row.id}
-                          </h4>
-                          <p>
-                            This is the full-width content that expands and
-                            collapses with the main row.
-                          </p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </React.Fragment>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
+                          <TableCell colSpan={row.getVisibleCells().length}>
+                            <div className="bg-gray-50 p-4 dark:bg-gray-800">
+                              {/* Replace with your actual row details */}
+                              <h4 className="mb-2 font-semibold">
+                                Details for Row {row.id}
+                              </h4>
+                              <p>
+                                This is the full-width content that expands and
+                                collapses with the main row.
+                              </p>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+              // </div>
             )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="text-muted-foreground flex-1 text-sm">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+          </Table>
         </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
+        {isLoading ? null : (
+          <div className="flex h-1/10 items-center justify-end space-x-2 py-4">
+            {/* <div className="text-muted-foreground flex-1 text-sm">
+              {table.getFilteredSelectedRowModel().rows.length} of{" "}
+              {table.getFilteredRowModel().rows.length} row(s) selected.
+            </div> */}
+            <div className="space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

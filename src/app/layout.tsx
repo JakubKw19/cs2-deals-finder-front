@@ -28,6 +28,16 @@ export default function RootLayout({
             <ClientWrapper>
               <div className="m-auto max-w-7xl p-10">{children}</div>
             </ClientWrapper>
+            <div className="bg-background fixed top-0 -z-20 min-h-screen w-full">
+              {/* Violet Storm Background with Top Glow */}
+              <div
+                className="absolute inset-0 -z-10"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(139, 92, 246, 0.25), transparent 70%)",
+                }}
+              />
+            </div>
           </ThemeProvider>
         </Providers>
       </body>

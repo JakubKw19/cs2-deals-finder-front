@@ -30,7 +30,7 @@ export default async function Navbar() {
   const pathname = (await headersList).get("x-pathname") || "";
   console.log(pathname);
   return (
-    <header className="fixed z-50 w-full border-b px-4 shadow-xl backdrop-blur-xl md:px-6">
+    <header className="shadow-s fixed z-50 w-full border-b px-4 backdrop-blur-xl md:px-6">
       <div className="flex h-16 justify-between gap-4">
         {/* Left side */}
         <div className="flex gap-2">

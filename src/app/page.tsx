@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useEffect, useRef } from "react";
 import { motion } from "motion/react";
 
-export function FeaturesSectionDemo() {
+function FeaturesSectionDemo() {
   const features = [
     {
       title: "Track issues effectively",
@@ -102,7 +102,7 @@ const FeatureDescription = ({ children }: { children?: React.ReactNode }) => {
   );
 };
 
-export const SkeletonOne = () => {
+const SkeletonOne = () => {
   return (
     <div className="relative flex h-full gap-10 px-2 py-8">
       <div className="group mx-auto h-full w-full bg-white p-5 shadow-2xl dark:bg-neutral-900">
@@ -124,7 +124,7 @@ export const SkeletonOne = () => {
   );
 };
 
-export const SkeletonThree = () => {
+const SkeletonThree = () => {
   return (
     <a
       href="https://www.youtube.com/watch?v=RPa3_AD1_Vs"
@@ -135,20 +135,20 @@ export const SkeletonThree = () => {
         <div className="relative flex h-full w-full flex-1 flex-col space-y-2">
           {/* TODO */}
           {/* <IconBrandYoutubeFilled className="h-20 w-20 absolute z-10 inset-0 text-red-500 m-auto " /> */}
-          <img
+          {/* <img
             src="https://assets.aceternity.com/fireship.jpg"
             alt="header"
             width={800}
             height={800}
             className="aspect-square h-full w-full rounded-sm object-cover object-center blur-none transition-all duration-200 group-hover/image:blur-md"
-          />
+          /> */}
         </div>
       </div>
     </a>
   );
 };
 
-export const SkeletonTwo = () => {
+const SkeletonTwo = () => {
   const images = [
     "https://images.unsplash.com/photo-1517322048670-4fba75cbbb62?q=80&w=3000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     "https://images.unsplash.com/photo-1573790387438-4da905039392?q=80&w=3425&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
@@ -177,9 +177,9 @@ export const SkeletonTwo = () => {
           <motion.div
             variants={imageVariants}
             key={"images-first" + idx}
-            style={{
-              rotate: Math.random() * 20 - 10,
-            }}
+            // style={{
+            //   rotate: Math.random() * 20 - 10,
+            // }}
             whileHover="whileHover"
             whileTap="whileTap"
             className="mt-4 -mr-4 shrink-0 overflow-hidden rounded-xl border border-neutral-100 bg-white p-1 dark:border-neutral-700 dark:bg-neutral-800"
@@ -198,9 +198,9 @@ export const SkeletonTwo = () => {
         {images.map((image, idx) => (
           <motion.div
             key={"images-second" + idx}
-            style={{
-              rotate: Math.random() * 20 - 10,
-            }}
+            // style={{
+            //   rotate: Math.random() * 20 - 10,
+            // }}
             variants={imageVariants}
             whileHover="whileHover"
             whileTap="whileTap"
@@ -223,7 +223,7 @@ export const SkeletonTwo = () => {
   );
 };
 
-export const SkeletonFour = () => {
+const SkeletonFour = () => {
   return (
     <div className="relative mt-10 flex h-60 flex-col items-center bg-transparent md:h-60 dark:bg-transparent">
       <Globe className="absolute -right-10 -bottom-80 md:-right-10 md:-bottom-72" />
@@ -231,7 +231,7 @@ export const SkeletonFour = () => {
   );
 };
 
-export const Globe = ({ className }: { className?: string }) => {
+const Globe = ({ className }: { className?: string }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -280,5 +280,9 @@ export const Globe = ({ className }: { className?: string }) => {
 };
 
 export default function Page() {
-  return <FeaturesSectionDemo />;
+  return (
+    <div>
+      <FeaturesSectionDemo />
+    </div>
+  );
 }
