@@ -445,7 +445,10 @@ export default function ItemTable({
                         onClick={() => row.toggleExpanded()}
                       >
                         {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id} className="p-2 text-center">
+                          <TableCell
+                            key={cell.id}
+                            className="max-h-18 p-2 text-center"
+                          >
                             {flexRender(
                               cell.column.columnDef.cell,
                               cell.getContext(),
