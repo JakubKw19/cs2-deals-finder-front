@@ -131,8 +131,8 @@ export default function Page() {
 
   return (
     <div>
-      <Tabs defaultValue={currentType} className="h-[85vh] items-center">
-        <div className="flex h-1/6 w-full flex-col justify-between">
+      <Tabs defaultValue={currentType} className="items-center">
+        <div className="flex h-1/6 w-full flex-col justify-between gap-4">
           <div className="flex justify-between">
             <TabsList className="text-foreground shadow-s glass-s gap-2 rounded-sm px-0">
               {types.map((text, index) => (

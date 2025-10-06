@@ -40,6 +40,7 @@ import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { FaSteam } from "react-icons/fa";
 import SkinsmonkeyJPG from "@/../public/skinsmonkey.jpg";
 import csfloatPNG from "@/../public/csfloat.png";
+import { getGroupedRowModel } from "@tanstack/react-table";
 
 type SingleItem = SortedItemsOutput[number];
 
@@ -73,6 +74,8 @@ export const columns: ColumnDef<SingleItem>[] = [
     id: "img",
     accessorFn: (row) => row.skinsMonkeyDetails.imageUrl,
     header: "",
+    enableGrouping: true, // allow grouping
+    aggregationFn: undefined, // disable aggregation
     cell: ({ row }) => {
       return (
         <div className="flex w-20 justify-center">
@@ -86,8 +89,11 @@ export const columns: ColumnDef<SingleItem>[] = [
     },
   },
   {
+    id: "market_hash_name",
     accessorKey: "market_hash_name",
     header: "Market name",
+    enableGrouping: true, // allow grouping
+    aggregationFn: undefined, // disable aggregation
     cell: ({ row }) => (
       <div className="text-left capitalize">
         {row.getValue("market_hash_name")}
@@ -98,6 +104,8 @@ export const columns: ColumnDef<SingleItem>[] = [
     id: "steamDetails.price",
     accessorFn: (row) => row.steamDetails?.price,
     header: "Steam price",
+    enableGrouping: true, // allow grouping
+    aggregationFn: undefined, // disable aggregation
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("steamDetails.price"));
       // Format the amount as a dollar amount
@@ -112,6 +120,8 @@ export const columns: ColumnDef<SingleItem>[] = [
     id: "csfloatDetails.price",
     accessorFn: (row) => row.csfloatDetails?.price,
     header: "CsFloat price",
+    enableGrouping: true, // allow grouping
+    aggregationFn: undefined, // disable aggregation
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("csfloatDetails.price"));
       // Format the amount as a dollar amount
@@ -126,6 +136,8 @@ export const columns: ColumnDef<SingleItem>[] = [
     id: "skinsMonkeyDetails.price",
     accessorFn: (row) => row.skinsMonkeyDetails?.price,
     header: "SkinsMonkey price",
+    enableGrouping: true, // allow grouping
+    aggregationFn: undefined, // disable aggregation
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("skinsMonkeyDetails.price"));
       // Format the amount as a dollar amount
@@ -140,6 +152,8 @@ export const columns: ColumnDef<SingleItem>[] = [
     id: "skinsMonkeyDetails.stickersPrice",
     accessorFn: (row) => row.skinsMonkeyDetails?.stickersPrice,
     header: "Stickers Price",
+    enableGrouping: false,
+    aggregationFn: undefined,
     cell: ({ row }) => {
       const amount = parseFloat(
         row.getValue("skinsMonkeyDetails.stickersPrice"),
@@ -153,7 +167,10 @@ export const columns: ColumnDef<SingleItem>[] = [
     },
   },
   {
+    id: "steamMultiplyer",
     accessorKey: "steamMultiplyer",
+    enableGrouping: true, // allow grouping
+    aggregationFn: undefined, // disable aggregation
     header: ({ column }) => {
       return (
         <Button
@@ -172,7 +189,10 @@ export const columns: ColumnDef<SingleItem>[] = [
     ),
   },
   {
+    id: "csfloatMultiplyer",
     accessorKey: "csfloatMultiplyer",
+    enableGrouping: true, // allow grouping
+    aggregationFn: undefined, // disable aggregation
     header: ({ column }) => {
       return (
         <Button
@@ -192,7 +212,10 @@ export const columns: ColumnDef<SingleItem>[] = [
     ),
   },
   {
+    id: "buffAddedStickerMultiplyer",
     accessorKey: "buffAddedStickerMultiplyer",
+    enableGrouping: false,
+    aggregationFn: undefined,
     header: ({ column }) => {
       return (
         <Button
@@ -211,10 +234,21 @@ export const columns: ColumnDef<SingleItem>[] = [
       </div>
     ),
   },
+  // {
+  //   accessorKey: "market_hash_name",
+  //   header: "Market name",
+  //   cell: ({ row }) => (
+  //     <div className="text-left capitalize">
+  //       {row.getValue("market_hash_name")}
+  //     </div>
+  //   ),
+  // },
   {
     id: "overstock",
     accessorFn: (row) => row.skinsMonkeyDetails.overstock,
     header: "Stock",
+    enableGrouping: false,
+    aggregationFn: undefined,
     cell: ({ row }) => {
       return (
         <div className="lowercase">
@@ -241,8 +275,11 @@ export const columns: ColumnDef<SingleItem>[] = [
     },
   },
   {
+    id: "links",
     accessorKey: "links",
     header: "Links",
+    enableGrouping: true, // allow grouping
+    aggregationFn: undefined, // disable aggregation
     accessorFn: (row) => row.links,
     cell: ({ row }) => (
       <div className="flex h-10 w-25 gap-1">
@@ -302,6 +339,8 @@ export const columns: ColumnDef<SingleItem>[] = [
   {
     id: "actions",
     enableHiding: false,
+    enableGrouping: true, // allow grouping
+    aggregationFn: undefined, // disable aggregation
     cell: ({ row }) => {
       const payment = row.original;
       return (
@@ -352,16 +391,21 @@ export default function ItemTable({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [grouping, setGrouping] = React.useState<string[]>([
+    "market_hash_name",
+  ]);
 
   const table = useReactTable({
     data,
     columns,
+    onGroupingChange: setGrouping,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getGroupedRowModel: getGroupedRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     state: {
@@ -369,13 +413,15 @@ export default function ItemTable({
       columnFilters,
       columnVisibility,
       rowSelection,
+      grouping,
     },
   });
 
+  // table.setGrouping(["market_hash_name"]);
   return (
     <div className="h-5/6 w-full">
       <div className="mb-2 flex items-center">
-        <DropdownMenu>
+        {/* <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
               Columns <ChevronDown />
@@ -400,7 +446,7 @@ export default function ItemTable({
                 );
               })}
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
       </div>
       <div className="h-full">
         <div className="h-9/10 overflow-y-auto rounded-md border">
@@ -449,9 +495,30 @@ export default function ItemTable({
                             key={cell.id}
                             className="max-h-18 p-2 text-center"
                           >
-                            {flexRender(
+                            {/* {flexRender(
                               cell.column.columnDef.cell,
                               cell.getContext(),
+                            )} */}
+                            {cell.getIsGrouped() ? (
+                              // This is the grouped "header" row for the group
+                              <>
+                                <button
+                                  onClick={row.getToggleExpandedHandler()}
+                                >
+                                  {row.getIsExpanded() ? "▼" : "▶"}
+                                </button>{" "}
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext(),
+                                )}{" "}
+                                ({row.subRows.length})
+                              </>
+                            ) : cell.getIsAggregated() ? null : (
+                              // Normal cell (leaf row)
+                              flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext(),
+                              )
                             )}
                           </TableCell>
                         ))}
