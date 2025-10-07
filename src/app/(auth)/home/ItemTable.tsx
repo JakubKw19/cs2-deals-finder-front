@@ -6,6 +6,7 @@ import {
   ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
@@ -74,9 +75,24 @@ export const columns: ColumnDef<SingleItem>[] = [
     id: "img",
     accessorFn: (row) => row.skinsMonkeyDetails.imageUrl,
     header: "",
-    enableGrouping: true, // allow grouping
-    aggregationFn: undefined, // disable aggregation
+    enableGrouping: true,
+    aggregatedCell: ({ getValue }) => {
+      return (
+        <div className="flex w-20 justify-center">
+          <img
+            className="h-10"
+            src={getValue() as string}
+            alt={getValue() as string}
+          />
+        </div>
+      );
+    },
+    aggregationFn: (id, rows) => {
+      const first = rows[0];
+      return first.getValue("img");
+    },
     cell: ({ row }) => {
+      if (row.depth > 0) return null;
       return (
         <div className="flex w-20 justify-center">
           <img
@@ -94,11 +110,19 @@ export const columns: ColumnDef<SingleItem>[] = [
     header: "Market name",
     enableGrouping: true, // allow grouping
     aggregationFn: undefined, // disable aggregation
-    cell: ({ row }) => (
-      <div className="text-left capitalize">
-        {row.getValue("market_hash_name")}
-      </div>
-    ),
+    cell: ({ row }) => {
+      if (row.depth > 0)
+        return (
+          <div className="text-muted pl-5 capitalize">
+            {row.getValue("market_hash_name")}
+          </div>
+        );
+      return (
+        <div className="pl-2 text-left capitalize">
+          {row.getValue("market_hash_name")}
+        </div>
+      );
+    },
   },
   {
     id: "steamDetails.price",
@@ -234,21 +258,24 @@ export const columns: ColumnDef<SingleItem>[] = [
       </div>
     ),
   },
-  // {
-  //   accessorKey: "market_hash_name",
-  //   header: "Market name",
-  //   cell: ({ row }) => (
-  //     <div className="text-left capitalize">
-  //       {row.getValue("market_hash_name")}
-  //     </div>
-  //   ),
-  // },
   {
     id: "overstock",
     accessorFn: (row) => row.skinsMonkeyDetails.overstock,
     header: "Stock",
-    enableGrouping: false,
-    aggregationFn: undefined,
+    enableGrouping: true,
+    aggregatedCell: ({ getValue }) => {
+      const value = getValue() as { stock: number; limit: number };
+      return (
+        <div className="lowercase">
+          {value.stock}/{value.limit}
+        </div>
+      );
+    },
+    aggregationFn: (id, rows) => {
+      const first = rows[0];
+      console.log(first.getValue("overstock"));
+      return first.getValue("overstock");
+    },
     cell: ({ row }) => {
       return (
         <div className="lowercase">
@@ -281,64 +308,70 @@ export const columns: ColumnDef<SingleItem>[] = [
     enableGrouping: true, // allow grouping
     aggregationFn: undefined, // disable aggregation
     accessorFn: (row) => row.links,
-    cell: ({ row }) => (
-      <div className="flex h-10 w-25 gap-1">
-        <a
-          href={
-            (
-              row.getValue("links") as {
-                steam: string;
-                skinsmonkey: string;
-                csfloat: string;
-              }
-            ).steam
-          }
-          target="_blank"
-        >
-          <FaSteam className="h-8 w-8" />
-        </a>
-        <a
-          href={
-            (
-              row.getValue("links") as {
-                steam: string;
-                skinsmonkey: string;
-                csfloat: string;
-              }
-            ).skinsmonkey
-          }
-          target="_blank"
-        >
-          <img
-            className="h-8 w-8 rounded-full"
-            src={SkinsmonkeyJPG.src}
-            alt="skinsmoneky"
-          />
-        </a>
-        <a
-          href={
-            (
-              row.getValue("links") as {
-                steam: string;
-                skinsmonkey: string;
-                csfloat: string;
-              }
-            ).csfloat
-          }
-          target="_blank"
-        >
-          <img
-            className="h-8 w-8 rounded-full"
-            src={csfloatPNG.src}
-            alt="csfloat"
-          />
-        </a>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const isGrouped = row.getIsGrouped();
+      // if (isGrouped) {
+      //   return <div>-</div>;
+      // }
+      return (
+        <div className="flex h-10 w-25 gap-1">
+          <a
+            href={
+              (
+                row.getValue("links") as {
+                  steam: string;
+                  skinsmonkey: string;
+                  csfloat: string;
+                }
+              ).steam
+            }
+            target="_blank"
+          >
+            <FaSteam className="h-8 w-8" />
+          </a>
+          <a
+            href={
+              (
+                row.getValue("links") as {
+                  steam: string;
+                  skinsmonkey: string;
+                  csfloat: string;
+                }
+              ).skinsmonkey
+            }
+            target="_blank"
+          >
+            <img
+              className="h-8 w-8 rounded-full"
+              src={SkinsmonkeyJPG.src}
+              alt="skinsmoneky"
+            />
+          </a>
+          <a
+            href={
+              (
+                row.getValue("links") as {
+                  steam: string;
+                  skinsmonkey: string;
+                  csfloat: string;
+                }
+              ).csfloat
+            }
+            target="_blank"
+          >
+            <img
+              className="h-8 w-8 rounded-full"
+              src={csfloatPNG.src}
+              alt="csfloat"
+            />
+          </a>
+        </div>
+      );
+    },
   },
   {
     id: "actions",
-    enableHiding: false,
+    // enableHiding: false,
     enableGrouping: true, // allow grouping
     aggregationFn: undefined, // disable aggregation
     cell: ({ row }) => {
@@ -406,6 +439,7 @@ export default function ItemTable({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getGroupedRowModel: getGroupedRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     state: {
@@ -484,66 +518,84 @@ export default function ItemTable({
               // <div className="h-full w-full overflow-y-auto">
               <TableBody className="glass">
                 {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <React.Fragment key={row.id}>
-                      <TableRow
-                        data-state={row.getIsSelected() && "selected"}
-                        onClick={() => row.toggleExpanded()}
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell
-                            key={cell.id}
-                            className="max-h-18 p-2 text-center"
-                          >
-                            {/* {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )} */}
-                            {cell.getIsGrouped() ? (
-                              // This is the grouped "header" row for the group
-                              <>
-                                <button
-                                  onClick={row.getToggleExpandedHandler()}
+                  table.getRowModel().rows.map((row) => {
+                    const isGroupedRow = row.getIsGrouped();
+                    const groupedColumnIds = table.getState().grouping;
+                    const groupedCellCount = row
+                      .getVisibleCells()
+                      .filter((cell) => cell.getIsGrouped()).length;
+                    return (
+                      <React.Fragment key={row.id}>
+                        <TableRow
+                          data-state={row.getIsSelected() && "selected"}
+                          onClick={() => !isGroupedRow && row.toggleExpanded()}
+                        >
+                          {row.getVisibleCells().map((cell) => {
+                            const groupingColumnId =
+                              table.getState().grouping[0];
+                            const isGroupedHeaderCell =
+                              table
+                                .getState()
+                                .grouping.includes(cell.column.id) &&
+                              row.getIsGrouped();
+                            if (isGroupedHeaderCell) {
+                              return (
+                                <TableCell
+                                  key={cell.id}
+                                  className="max-h-18 p-2 text-center"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    row.toggleExpanded();
+                                  }}
                                 >
-                                  {row.getIsExpanded() ? "▼" : "▶"}
-                                </button>{" "}
+                                  {flexRender(
+                                    cell.column.columnDef.cell,
+                                    cell.getContext(),
+                                  )}
+                                </TableCell>
+                              );
+                            } else if (isGroupedRow) {
+                              const columnId = cell.column.id;
+                              return (
+                                <TableCell
+                                  key={cell.id}
+                                  className="max-h-18 p-2 text-center"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    row.toggleExpanded();
+                                  }}
+                                >
+                                  {![
+                                    "buffAddedStickerMultiplyer",
+                                    "links",
+                                  ].includes(columnId)
+                                    ? flexRender(
+                                        cell.column.columnDef.cell,
+                                        cell.getContext(),
+                                      )
+                                    : null}
+                                </TableCell>
+                              );
+                            }
+                            if (isGroupedRow) {
+                              return null;
+                            }
+                            return (
+                              <TableCell
+                                key={cell.id}
+                                className="max-h-18 p-1 text-center"
+                              >
                                 {flexRender(
                                   cell.column.columnDef.cell,
                                   cell.getContext(),
-                                )}{" "}
-                                ({row.subRows.length})
-                              </>
-                            ) : cell.getIsAggregated() ? null : (
-                              // Normal cell (leaf row)
-                              flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext(),
-                              )
-                            )}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                      {row.getIsExpanded() && (
-                        <TableRow>
-                          {/* The second row's cell must span the full width of the table
-                  using colSpan.
-                */}
-                          <TableCell colSpan={row.getVisibleCells().length}>
-                            <div className="bg-gray-50 p-4 dark:bg-gray-800">
-                              {/* Replace with your actual row details */}
-                              <h4 className="mb-2 font-semibold">
-                                Details for Row {row.id}
-                              </h4>
-                              <p>
-                                This is the full-width content that expands and
-                                collapses with the main row.
-                              </p>
-                            </div>
-                          </TableCell>
+                                )}
+                              </TableCell>
+                            );
+                          })}
                         </TableRow>
-                      )}
-                    </React.Fragment>
-                  ))
+                      </React.Fragment>
+                    );
+                  })
                 ) : (
                   <TableRow>
                     <TableCell
