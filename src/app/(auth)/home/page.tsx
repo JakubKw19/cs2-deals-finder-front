@@ -29,13 +29,15 @@ const inputKeys = Object.keys({
 const types = [
   "sticker",
   "stickerAdded",
-  "csfloat",
   "buff",
+  "csfloat",
   "steam",
   "steambid",
   "keychain",
   "blue",
-];
+] as const;
+
+type FilterType = (typeof types)[number];
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useId, useState } from "react";
@@ -50,6 +52,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { randomUUID } from "crypto";
+import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 
 // function TabsComponent({
 //   types,
@@ -88,10 +91,10 @@ const tags = [
     text: "Travel",
   },
 ];
-
 export default function Page() {
   const id = useId();
-  const [currentType, setCurrentType] = useState("csfloat");
+  const [currentType, setCurrentType] = useState<FilterType>("steam");
+  // const [currentType, setCurrentType] = useState("csfloat");
   const { data: session, status } = useSession();
   const [searchValue, setSearchValue] = useState("");
   const [currentTagOption, setCurrentTagOption] = useState("Include");
@@ -99,10 +102,12 @@ export default function Page() {
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
   const [minValue, setMinValue] = useState<string | null>("");
   const [maxValue, setMaxValue] = useState<string | null>("");
+  const [ascending, setAscending] = useState<string>("true");
   const sortedItems = trpc.sorting.sortPrices.useQuery({
     type: currentType,
     min: minValue,
     max: maxValue,
+    ascending: ascending,
   });
   // If session is loading, you can show a loading indicator
   if (status === "loading") {
@@ -131,10 +136,13 @@ export default function Page() {
 
   return (
     <div>
-      <Tabs defaultValue={currentType} className="items-center">
-        <div className="flex h-1/6 w-full flex-col justify-between gap-4">
-          <div className="flex justify-between">
-            <TabsList className="text-foreground shadow-s glass-s gap-2 rounded-sm px-0">
+      <div className="flex h-1/6 w-full flex-col justify-between gap-4">
+        <div className="flex justify-between">
+          <Tabs defaultValue={currentType} className="items-center">
+            <TabsList
+              id={"1"}
+              className="text-foreground shadow-s glass-s gap-2 rounded-sm px-0"
+            >
               {types.map((text, index) => (
                 <TabsTrigger
                   key={index}
@@ -146,94 +154,122 @@ export default function Page() {
                 </TabsTrigger>
               ))}
             </TabsList>
-            <div className="flex gap-4 rounded">
-              <div className="group relative">
-                <label
-                  htmlFor={id}
-                  className="text-foreground absolute start-2 top-0 z-10 block -translate-y-1/2 px-2 text-xs font-medium group-has-disabled:opacity-50"
-                >
-                  Min
-                </label>
-                <Input
-                  id={id}
-                  placeholder="Value"
-                  value={minValue}
-                  type="number"
-                  onChange={(event) => setMinValue(event.target.value)}
-                  className="!focus:outline-none focus-visible:border-input -ms-px rounded focus:ring-0 focus-visible:z-10 focus-visible:ring-0"
-                />
-              </div>
-              <div className="group relative">
-                <label
-                  htmlFor={id}
-                  className="text-foreground absolute start-2 top-0 z-10 block -translate-y-1/2 px-2 text-xs font-medium group-has-disabled:opacity-50"
-                >
-                  Max
-                </label>
-                <Input
-                  id={id}
-                  placeholder="Value"
-                  value={maxValue}
-                  onChange={(event) => setMaxValue(event.target.value)}
-                  className="!focus:outline-none focus-visible:border-input -ms-px rounded focus:ring-0 focus-visible:z-10 focus-visible:ring-0"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <div className="flex rounded-md shadow-xs">
-              <Select
-                defaultValue={currentTagOption}
-                onValueChange={(value) => setCurrentTagOption(value)}
+          </Tabs>
+          <Tabs defaultValue={"true"} className="items-center">
+            <TabsList
+              id={"2"}
+              className="text-foreground shadow-s glass-s gap-2 rounded-sm px-0"
+            >
+              <TabsTrigger
+                value={"true"}
+                className="px-3"
+                // className="hover:text-foreground data-[state=active]:after:bg-primary relative after:absolute after:inset-x-3 after:bottom-0 after:-mb-1 after:h-0.5"
+                onClick={() => setAscending("true")}
               >
-                <SelectTrigger className="text-muted-foreground hover:text-foreground w-fit rounded-e-none shadow-none">
-                  <SelectValue placeholder={currentTagOption} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Include">Include</SelectItem>
-                  <SelectItem value="Exclude">Exclude</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="flex flex-col"></div>
+                <FaArrowDown />
+              </TabsTrigger>
+              <TabsTrigger
+                value={"false"}
+                className="px-3"
+                // className="hover:text-foreground data-[state=active]:after:bg-primary relative after:absolute after:inset-x-3 after:bottom-0 after:-mb-1 after:h-0.5"
+                onClick={() => setAscending("false")}
+              >
+                <FaArrowUp />
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <div className="flex gap-4 rounded">
+            <div className="group relative">
+              <label
+                htmlFor={id}
+                className="text-foreground absolute start-2 top-0 z-10 block -translate-y-1/2 px-2 text-xs font-medium group-has-disabled:opacity-50"
+              >
+                Min Price
+              </label>
               <Input
-                placeholder="Filter emails..."
-                value={searchValue}
-                onChange={(event) => setSearchValue(event.target.value)}
-                className="-ms-px rounded-s-none shadow-none focus-visible:z-10"
+                id={id}
+                placeholder="Value $"
+                value={minValue}
+                pattern="[0-9]*"
+                onChange={(event) => setMinValue(event.target.value)}
+                className="!focus:outline-none focus-visible:border-input -ms-px rounded focus:ring-0 focus-visible:z-10 focus-visible:ring-0"
               />
             </div>
-            <Button variant="outline" onClick={() => addActiveTag(searchValue)}>
-              Add
-            </Button>
-          </div>
-          <div className="mb-2 flex flex-wrap gap-2 overflow-y-auto">
-            {exampleTags.map((tag: Tag, index: number) => (
-              <div
-                key={tag.id}
-                className="bg-card flex items-center gap-1 rounded-full px-3 py-1 text-sm"
+            <div className="group relative">
+              <label
+                htmlFor={id}
+                className="text-foreground absolute start-2 top-0 z-10 block -translate-y-1/2 px-2 text-xs font-medium group-has-disabled:opacity-50"
               >
-                {tag.text}
-                <button
-                  className="text-xs"
-                  onClick={() =>
-                    setExampleTags((prev) => prev.filter((_, i) => i !== index))
-                  }
-                >
-                  ×
-                </button>
-              </div>
-            ))}
+                Max Price
+              </label>
+              <Input
+                id={id}
+                placeholder="Value $"
+                value={maxValue}
+                pattern="[0-9]*"
+                onChange={(event) => setMaxValue(event.target.value)}
+                className="!focus:outline-none focus-visible:border-input -ms-px rounded focus:ring-0 focus-visible:z-10 focus-visible:ring-0"
+              />
+            </div>
           </div>
-          {/* <div className="flex justify-center">
+        </div>
+        <div className="flex gap-2">
+          <div className="flex rounded-md shadow-xs">
+            <Select
+              defaultValue={currentTagOption}
+              onValueChange={(value) => setCurrentTagOption(value)}
+            >
+              <SelectTrigger className="text-muted-foreground hover:text-foreground w-fit rounded-e-none shadow-none">
+                <SelectValue placeholder={currentTagOption} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Include">Include</SelectItem>
+                <SelectItem value="Exclude">Exclude</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex flex-col"></div>
+            <Input
+              placeholder="Filter emails..."
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
+              className="-ms-px rounded-s-none shadow-none focus-visible:z-10"
+            />
+          </div>
+          <Button variant="outline" onClick={() => addActiveTag(searchValue)}>
+            Add
+          </Button>
+        </div>
+        <div className="mb-2 flex flex-wrap gap-2 overflow-y-auto">
+          {exampleTags.map((tag: Tag, index: number) => (
+            <div
+              key={tag.id}
+              className="bg-card flex items-center gap-1 rounded-full px-3 py-1 text-sm"
+            >
+              {tag.text}
+              <button
+                className="text-xs"
+                onClick={() =>
+                  setExampleTags((prev) => prev.filter((_, i) => i !== index))
+                }
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+        {/* <div className="flex justify-center">
             <Button onClick={() => handleSearch()}>Search</Button>
           </div> */}
-        </div>
-        {/* {sortedItems.isLoading ? (
+      </div>
+      {/* {sortedItems.isLoading ? (
           <div>Loading</div>
         ) : ( */}
-        <ItemTable data={sortedItems.data} isLoading={sortedItems.isLoading} />
-        {/* )} */}
-      </Tabs>
+      <ItemTable
+        data={sortedItems.data}
+        isLoading={sortedItems.isLoading}
+        filterType={currentType}
+      />
+      {/* )} */}
     </div>
   );
 }
