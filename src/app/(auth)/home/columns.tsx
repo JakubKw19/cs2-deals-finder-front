@@ -224,46 +224,46 @@ export const columns: ColumnDef<SingleItem>[] = [
       </div>
     ),
   },
-  {
-    id: "skinsMonkeyDetails.stickersPrice",
-    accessorFn: (row) => row.skinsMonkeyDetails?.stickersPrice,
-    header: "Stickers Price",
-    enableGrouping: false,
-    aggregationFn: undefined,
-    cell: ({ row }) => {
-      const amount = parseFloat(
-        row.getValue("skinsMonkeyDetails.stickersPrice"),
-      );
-      const formatted = new Intl.NumberFormat("de-DE", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount);
-      return <div className="lowercase">{formatted}</div>;
-    },
-  },
-  {
-    id: "buffAddedStickerMultiplyer",
-    accessorKey: "buffAddedStickerMultiplyer",
-    enableGrouping: false,
-    aggregationFn: undefined,
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="m-0 p-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Added Stck
-          <ArrowUpDown />
-        </Button>
-      );
-    },
-    cell: ({ row }) => (
-      <div className="lowercase">
-        {Number(row.getValue("buffAddedStickerMultiplyer")).toPrecision(4)} %
-      </div>
-    ),
-  },
+  // {
+  //   id: "skinsMonkeyDetails.stickersPrice",
+  //   accessorFn: (row) => row.skinsMonkeyDetails?.stickersPrice,
+  //   header: "Stickers Price",
+  //   enableGrouping: false,
+  //   aggregationFn: undefined,
+  //   cell: ({ row }) => {
+  //     const amount = parseFloat(
+  //       row.getValue("skinsMonkeyDetails.stickersPrice"),
+  //     );
+  //     const formatted = new Intl.NumberFormat("de-DE", {
+  //       style: "currency",
+  //       currency: "USD",
+  //     }).format(amount);
+  //     return <div className="lowercase">{formatted}</div>;
+  //   },
+  // },
+  // {
+  //   id: "buffAddedStickerMultiplyer",
+  //   accessorKey: "buffAddedStickerMultiplyer",
+  //   enableGrouping: false,
+  //   aggregationFn: undefined,
+  //   header: ({ column }) => {
+  //     return (
+  //       <Button
+  //         variant="ghost"
+  //         className="m-0 p-0"
+  //         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+  //       >
+  //         Added Stck
+  //         <ArrowUpDown />
+  //       </Button>
+  //     );
+  //   },
+  //   cell: ({ row }) => (
+  //     <div className="lowercase">
+  //       {Number(row.getValue("buffAddedStickerMultiplyer")).toPrecision(4)} %
+  //     </div>
+  //   ),
+  // },
   {
     id: "overstock",
     accessorFn: (row) => row.skinsMonkeyDetails.overstock,

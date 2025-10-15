@@ -44,15 +44,23 @@ import { getGroupedRowModel } from "@tanstack/react-table";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { columns as baseColumns } from "./columns";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-export type SingleItem = SortedItemsOutput[number];
+export type SingleItem = SortedItemsOutput["items"][number];
 
 const config: {
-  [key: string]: { grouping: boolean; addedColumns?: string[] };
+  [key: string]: {
+    grouping: boolean;
+    addedColumns?: string[];
+    takenColumns?: string[];
+  };
 } = {
   sticker: {
     grouping: false,
+    addedColumns: [
+      "buffAddedStickerMultiplyer",
+      "skinsMonkeyDetails.stickersPrice",
+    ],
   },
   blue: {
     grouping: false,
@@ -60,6 +68,7 @@ const config: {
   },
   stickerAdded: {
     grouping: false,
+    addedColumns: ["buffAddedStickerMultiplyer"],
   },
   csfloat: {
     grouping: true,
@@ -77,16 +86,34 @@ const config: {
     grouping: false,
     addedColumns: ["keychain"],
   },
+  skinplace: {
+    grouping: false,
+    // takenColumns: ["skinsMonkeyDetails.stickersPrice"],
+  },
+  skinplaceBuff: {
+    grouping: true,
+  },
+  skinplaceAdded: {
+    grouping: false,
+  },
 };
+
+import type { PaginationState } from "@tanstack/react-table";
 
 export default function ItemTable({
   data,
   isLoading,
   filterType,
+  pagination,
+  setPagination,
 }: {
   data: SortedItemsOutput;
   isLoading: boolean;
   filterType: keyof typeof config;
+  pagination: PaginationState;
+  setPagination: (
+    updater: PaginationState | ((old: PaginationState) => PaginationState),
+  ) => void;
 }) {
   const id = React.useId();
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -134,7 +161,7 @@ export default function ItemTable({
         },
       };
       const nameIndex = newColumns.findIndex(
-        (c) => c.id === "buffAddedStickerMultiplyer",
+        (c) => c.id === "csfloatMultiplyer",
       );
       if (nameIndex !== -1) {
         newColumns.splice(nameIndex + 1, 0, blueColumn);
@@ -142,8 +169,8 @@ export default function ItemTable({
         newColumns.push(blueColumn); // Fallback to add at the end
       }
     } else if (filterType == "keychain") {
-      const blueColumn: ColumnDef<SingleItem> = {
-        id: "blue",
+      const column: ColumnDef<SingleItem> = {
+        id: "keychain",
         accessorFn: (row) => row.skinsMonkeyDetails?.keychainsPrice, // Accessor for the data
         header: "Keychain",
         cell: ({ getValue }) => {
@@ -156,12 +183,107 @@ export default function ItemTable({
         },
       };
       const nameIndex = newColumns.findIndex(
-        (c) => c.id === "buffAddedStickerMultiplyer",
+        (c) => c.id === "csfloatMultiplyer",
       );
       if (nameIndex !== -1) {
-        newColumns.splice(nameIndex + 1, 0, blueColumn);
+        newColumns.splice(nameIndex + 1, 0, column);
       } else {
-        newColumns.push(blueColumn); // Fallback to add at the end
+        newColumns.push(column); // Fallback to add at the end
+      }
+    } else if (filterType == "skinplace") {
+      const column: ColumnDef<SingleItem> = {
+        id: "skinplace",
+        accessorFn: (row) => row.skinplaceMultiplyer, // Accessor for the data
+        header: "skinplace",
+        cell: ({ getValue }) => {
+          if (!getValue()) return "N/A";
+          return Number(getValue()).toPrecision(4) + "%";
+        },
+      };
+      const nameIndex = newColumns.findIndex(
+        (c) => c.id === "csfloatMultiplyer",
+      );
+      if (nameIndex !== -1) {
+        newColumns.splice(nameIndex + 1, 0, column);
+      } else {
+        newColumns.push(column); // Fallback to add at the end
+      }
+      const column2: ColumnDef<SingleItem> = {
+        id: "skinplace",
+        accessorFn: (row) => row.skinplaceDetails.price, // Accessor for the data
+        header: "skinplace",
+        cell: ({ getValue }) => {
+          if (!getValue()) return "N/A";
+          return Number(getValue()).toPrecision(4) + "%";
+        },
+      };
+      const nameIndex2 = newColumns.findIndex(
+        (c) => c.id === "skinsMonkeyDetails.stickersPrice",
+      );
+      if (nameIndex2 !== -1) {
+        newColumns.splice(nameIndex + 1, 0, column2);
+      } else {
+        newColumns.push(column2); // Fallback to add at the end
+      }
+    } else if (filterType == "sticker" || filterType == "stickerAdded") {
+      const column: ColumnDef<SingleItem> = {
+        id: "skinsMonkeyDetails.stickersPrice",
+        accessorFn: (row) => row.skinsMonkeyDetails?.stickersPrice,
+        header: "Stickers Price",
+        enableGrouping: false,
+        aggregationFn: undefined,
+        cell: ({ row }) => {
+          const amount = parseFloat(
+            row.getValue("skinsMonkeyDetails.stickersPrice"),
+          );
+          const formatted = new Intl.NumberFormat("de-DE", {
+            style: "currency",
+            currency: "USD",
+          }).format(amount);
+          return <div className="lowercase">{formatted}</div>;
+        },
+      };
+      const nameIndex = newColumns.findIndex(
+        (c) => c.id === "csfloatMultiplyer",
+      );
+      if (nameIndex !== -1) {
+        newColumns.splice(nameIndex + 1, 0, column);
+      } else {
+        newColumns.push(column); // Fallback to add at the end
+      }
+      const column2: ColumnDef<SingleItem> = {
+        id: "buffAddedStickerMultiplyer",
+        accessorKey: "buffAddedStickerMultiplyer",
+        enableGrouping: false,
+        aggregationFn: undefined,
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              className="m-0 p-0"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              Added Stck
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="lowercase">
+            {Number(row.getValue("buffAddedStickerMultiplyer")).toPrecision(4)}{" "}
+            %
+          </div>
+        ),
+      };
+      const nameIndex2 = newColumns.findIndex(
+        (c) => c.id === "skinsMonkeyDetails.stickersPrice",
+      );
+      if (nameIndex2 !== -1) {
+        newColumns.splice(nameIndex + 1, 0, column2);
+      } else {
+        newColumns.push(column2); // Fallback to add at the end
       }
     }
 
@@ -169,8 +291,9 @@ export default function ItemTable({
   }, [filterType]);
 
   const table = useReactTable({
-    data,
+    data: data.items,
     columns,
+    manualPagination: true,
     onGroupingChange: setGrouping,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -184,12 +307,14 @@ export default function ItemTable({
     onRowSelectionChange: setRowSelection,
     paginateExpandedRows: false,
     state: {
+      pagination,
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
       grouping,
     },
+    onPaginationChange: setPagination,
   });
 
   // table.setGrouping(["market_hash_name"]);
@@ -237,7 +362,7 @@ export default function ItemTable({
             </p> */}
           </div>
         </div>
-        {/* <DropdownMenu>
+        <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
               Columns <ChevronDown />
@@ -262,7 +387,7 @@ export default function ItemTable({
                 );
               })}
           </DropdownMenuContent>
-        </DropdownMenu> */}
+        </DropdownMenu>
       </div>
       <div>
         <div className="overflow-y-auto rounded-md border">
@@ -417,16 +542,28 @@ export default function ItemTable({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
+                onClick={() =>
+                  setPagination((prev) => ({
+                    ...prev,
+                    pageIndex: prev.pageIndex - 1,
+                  }))
+                }
+                disabled={pagination.pageIndex < 2}
               >
                 Previous
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
+                onClick={() =>
+                  setPagination((prev) => ({
+                    ...prev,
+                    pageIndex: prev.pageIndex + 1,
+                  }))
+                }
+                disabled={
+                  (pagination.pageIndex + 1) * data.pageSize >= data.total
+                }
               >
                 Next
               </Button>

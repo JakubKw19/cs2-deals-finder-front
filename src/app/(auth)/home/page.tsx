@@ -35,12 +35,15 @@ const types = [
   "steambid",
   "keychain",
   "blue",
+  "skinplace",
+  "skinplaceBuff",
+  "skinplaceAdded",
 ] as const;
 
 type FilterType = (typeof types)[number];
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SelectNative } from "@/components/ui/select-native";
@@ -102,13 +105,35 @@ export default function Page() {
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
   const [minValue, setMinValue] = useState<string | null>("");
   const [maxValue, setMaxValue] = useState<string | null>("");
-  const [ascending, setAscending] = useState<string>("true");
+  const [ascending, setAscending] = useState<"desc" | "asc">("desc");
+  const [grouping, setGrouping] = useState<boolean>(true);
+  const [pagination, setPagination] = useState({
+    pageIndex: 1,
+    pageSize: 10,
+  });
   const sortedItems = trpc.sorting.sortPrices.useQuery({
-    type: currentType,
+    sortBy: currentType,
     min: minValue,
     max: maxValue,
-    ascending: ascending,
+    sortOrder: ascending,
+    page: pagination.pageIndex.toString(),
+    grouping: grouping ? "true" : "false",
   });
+
+  useEffect(() => {
+    setPagination((prev) => ({
+      ...prev,
+      pageIndex: 1,
+    }));
+  }, [currentType]);
+
+  const addActiveTag = (tag: string) => {
+    if (!tag) return; // prevent empty tags
+    const newTag = { id: crypto.randomUUID(), text: tag };
+    setExampleTags((prev) => [...prev, newTag]);
+    setSearchValue(""); // clear input
+  };
+
   // If session is loading, you can show a loading indicator
   if (status === "loading") {
     return <div>Loading...</div>;
@@ -118,13 +143,6 @@ export default function Page() {
   if (!session) {
     return <div>Please log in to view your dashboard.</div>;
   }
-
-  const addActiveTag = (tag: string) => {
-    if (!tag) return; // prevent empty tags
-    const newTag = { id: crypto.randomUUID(), text: tag };
-    setExampleTags((prev) => [...prev, newTag]);
-    setSearchValue(""); // clear input
-  };
 
   const handleSearch = () => {
     // sortedItems.refetch({
@@ -164,7 +182,7 @@ export default function Page() {
                 value={"true"}
                 className="px-3"
                 // className="hover:text-foreground data-[state=active]:after:bg-primary relative after:absolute after:inset-x-3 after:bottom-0 after:-mb-1 after:h-0.5"
-                onClick={() => setAscending("true")}
+                onClick={() => setAscending("desc")}
               >
                 <FaArrowDown />
               </TabsTrigger>
@@ -172,12 +190,44 @@ export default function Page() {
                 value={"false"}
                 className="px-3"
                 // className="hover:text-foreground data-[state=active]:after:bg-primary relative after:absolute after:inset-x-3 after:bottom-0 after:-mb-1 after:h-0.5"
-                onClick={() => setAscending("false")}
+                onClick={() => setAscending("asc")}
               >
                 <FaArrowUp />
               </TabsTrigger>
             </TabsList>
           </Tabs>
+        </div>
+        <div className="flex justify-between">
+          <div className="flex rounded-md shadow-xs">
+            <div className="flex">
+              <Select
+                defaultValue={currentTagOption}
+                onValueChange={(value) => setCurrentTagOption(value)}
+              >
+                <SelectTrigger className="text-muted-foreground hover:text-foreground w-fit rounded-e-none shadow-none">
+                  <SelectValue placeholder={currentTagOption} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Include">Include</SelectItem>
+                  <SelectItem value="Exclude">Exclude</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="flex flex-col"></div>
+              <Input
+                placeholder="Filter emails..."
+                value={searchValue}
+                onChange={(event) => setSearchValue(event.target.value)}
+                className="-ms-px rounded-s-none shadow-none focus-visible:z-10"
+              />
+            </div>
+            <Button
+              className="ml-2"
+              variant="outline"
+              onClick={() => addActiveTag(searchValue)}
+            >
+              Add
+            </Button>
+          </div>
           <div className="flex gap-4 rounded">
             <div className="group relative">
               <label
@@ -213,32 +263,6 @@ export default function Page() {
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
-          <div className="flex rounded-md shadow-xs">
-            <Select
-              defaultValue={currentTagOption}
-              onValueChange={(value) => setCurrentTagOption(value)}
-            >
-              <SelectTrigger className="text-muted-foreground hover:text-foreground w-fit rounded-e-none shadow-none">
-                <SelectValue placeholder={currentTagOption} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Include">Include</SelectItem>
-                <SelectItem value="Exclude">Exclude</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="flex flex-col"></div>
-            <Input
-              placeholder="Filter emails..."
-              value={searchValue}
-              onChange={(event) => setSearchValue(event.target.value)}
-              className="-ms-px rounded-s-none shadow-none focus-visible:z-10"
-            />
-          </div>
-          <Button variant="outline" onClick={() => addActiveTag(searchValue)}>
-            Add
-          </Button>
-        </div>
         <div className="mb-2 flex flex-wrap gap-2 overflow-y-auto">
           {exampleTags.map((tag: Tag, index: number) => (
             <div
@@ -257,19 +281,22 @@ export default function Page() {
             </div>
           ))}
         </div>
+
         {/* <div className="flex justify-center">
             <Button onClick={() => handleSearch()}>Search</Button>
           </div> */}
       </div>
-      {/* {sortedItems.isLoading ? (
-          <div>Loading</div>
-        ) : ( */}
-      <ItemTable
-        data={sortedItems.data}
-        isLoading={sortedItems.isLoading}
-        filterType={currentType}
-      />
-      {/* )} */}
+      {sortedItems.isLoading ? (
+        <div>Loading</div>
+      ) : (
+        <ItemTable
+          data={sortedItems.data}
+          isLoading={sortedItems.isLoading}
+          filterType={currentType}
+          pagination={pagination}
+          setPagination={setPagination}
+        />
+      )}
     </div>
   );
 }
