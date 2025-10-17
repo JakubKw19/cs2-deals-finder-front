@@ -26,7 +26,7 @@ export default function RootLayout({
           >
             <Navbar />
             <ClientWrapper>
-              <div className="m-auto max-w-7xl p-10">{children}</div>
+              <div className="m-auto max-w-[1920px] p-10">{children}</div>
             </ClientWrapper>
             <div className="bg-background fixed top-0 -z-20 min-h-screen w-full">
               {/* Violet Storm Background with Top Glow */}

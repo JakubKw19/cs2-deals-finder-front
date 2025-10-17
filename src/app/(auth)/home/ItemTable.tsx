@@ -45,18 +45,21 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { columns as baseColumns } from "./columns";
 import { useEffect, useState } from "react";
+import { config, useColumnData } from "./useColumnData";
 
 export type SingleItem = SortedItemsOutput["items"][number];
 
-const config: {
-  [key: string]: {
-    grouping: boolean;
-    addedColumns?: string[];
-    takenColumns?: string[];
-  };
-} = {
+const columnConfig: config = {
+  market_hash_name: {
+    grouping: true,
+    type: "name",
+    displayName: "Item Name",
+  },
   sticker: {
     grouping: false,
+    type: "currency",
+    displayName: "Sticker Price",
+    accessorFn: (row: SingleItem) => row.skinsMonkeyDetails?.stickersPrice,
     addedColumns: [
       "buffAddedStickerMultiplyer",
       "skinsMonkeyDetails.stickersPrice",
@@ -64,38 +67,62 @@ const config: {
   },
   blue: {
     grouping: false,
+    type: "multiplyer",
+    displayName: "Blue %",
+    accessorFn: (row: SingleItem) =>
+      row.skinsMonkeyDetails?.bluePercent
+        ? row.skinsMonkeyDetails?.bluePercent[0]
+        : undefined,
     addedColumns: ["blue"],
   },
   stickerAdded: {
     grouping: false,
+    type: "multiplyer",
+    displayName: "Sticker Added",
+    accessorFn: (row: SingleItem) => row.buffAddedStickerMultiplyer,
     addedColumns: ["buffAddedStickerMultiplyer"],
   },
   csfloat: {
     grouping: true,
+    type: "multiplyer",
+    displayName: "CSFloat",
+    accessorFn: (row: SingleItem) => row.csfloatMultiplyer,
   },
   buff: {
     grouping: true,
+    type: "currency",
+    displayName: "Buff163",
+    accessorFn: (row: SingleItem) => row.buff163Details.price,
   },
   steam: {
     grouping: true,
+    type: "currency",
+    displayName: "Steam price",
+    accessorFn: (row: SingleItem) => row.steamDetails?.price,
   },
-  steambid: {
+  steamMulitplyer: {
     grouping: true,
+    type: "multiplyer",
+    displayName: "Steam",
+    accessorFn: (row: SingleItem) => row.steamMultiplyer,
   },
-  keychain: {
-    grouping: false,
-    addedColumns: ["keychain"],
-  },
-  skinplace: {
-    grouping: false,
-    // takenColumns: ["skinsMonkeyDetails.stickersPrice"],
-  },
-  skinplaceBuff: {
-    grouping: true,
-  },
-  skinplaceAdded: {
-    grouping: false,
-  },
+  // steambid: {
+  //   grouping: true,
+  // },
+  // keychain: {
+  //   grouping: false,
+  //   addedColumns: ["keychain"],
+  // },
+  // skinplace: {
+  //   grouping: false,
+  //   // takenColumns: ["skinsMonkeyDetails.stickersPrice"],
+  // },
+  // skinplaceBuff: {
+  //   grouping: true,
+  // },
+  // skinplaceAdded: {
+  //   grouping: false,
+  // },
 };
 
 import type { PaginationState } from "@tanstack/react-table";
@@ -109,7 +136,7 @@ export default function ItemTable({
 }: {
   data: SortedItemsOutput;
   isLoading: boolean;
-  filterType: keyof typeof config;
+  filterType: keyof typeof columnConfig;
   pagination: PaginationState;
   setPagination: (
     updater: PaginationState | ((old: PaginationState) => PaginationState),
@@ -123,7 +150,7 @@ export default function ItemTable({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const currentConfig = config[filterType];
+  const currentConfig = columnConfig[filterType];
   const [grouping, setGrouping] = React.useState<string[]>(
     currentConfig.grouping ? ["market_hash_name"] : [],
   );
@@ -190,7 +217,7 @@ export default function ItemTable({
       } else {
         newColumns.push(column); // Fallback to add at the end
       }
-    } else if (filterType == "skinplace") {
+    } else if (filterType == "skinplace" || "skinplaceBuff") {
       const column: ColumnDef<SingleItem> = {
         id: "skinplace",
         accessorFn: (row) => row.skinplaceMultiplyer, // Accessor for the data
@@ -208,22 +235,57 @@ export default function ItemTable({
       } else {
         newColumns.push(column); // Fallback to add at the end
       }
+
       const column2: ColumnDef<SingleItem> = {
-        id: "skinplace",
-        accessorFn: (row) => row.skinplaceDetails.price, // Accessor for the data
-        header: "skinplace",
+        id: "skinplaceBuffMulitplyer",
+        accessorFn: (row) => row.skinplaceBuffMulitplyer, // Accessor for the data
+        header: "skinplaceBuff",
         cell: ({ getValue }) => {
           if (!getValue()) return "N/A";
           return Number(getValue()).toPrecision(4) + "%";
         },
       };
-      const nameIndex2 = newColumns.findIndex(
-        (c) => c.id === "skinsMonkeyDetails.stickersPrice",
-      );
+      const nameIndex2 = newColumns.findIndex((c) => c.id === "skinplace");
       if (nameIndex2 !== -1) {
         newColumns.splice(nameIndex + 1, 0, column2);
       } else {
         newColumns.push(column2); // Fallback to add at the end
+      }
+
+      const column3: ColumnDef<SingleItem> = {
+        id: "skiplacePrice",
+        accessorFn: (row) => row.skinplaceDetails.price,
+        header: "Skinplace price",
+        enableGrouping: true,
+        aggregatedCell: ({ getValue }) => {
+          return <div className="lowercase">{getValue() as string}</div>;
+        },
+        aggregationFn: (id, rows) => {
+          const amount = parseFloat(
+            String(rows[0].getValue("skiplacePrice")).replace(/[^0-9.-]+/g, ""),
+          );
+          const formatted = new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+          }).format(amount);
+          return formatted;
+        },
+        cell: ({ row }) => {
+          const amount = parseFloat(
+            String(row.getValue("skiplacePrice")).replace(/[^0-9.-]+/g, ""),
+          );
+          const formatted = new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+          }).format(amount);
+          return <div className="lowercase">{formatted}</div>;
+        },
+      };
+      const nameIndex3 = newColumns.findIndex((c) => c.id === "buff163price");
+      if (nameIndex3 !== -1) {
+        newColumns.splice(nameIndex + 1, 0, column3);
+      } else {
+        newColumns.push(column3); // Fallback to add at the end
       }
     } else if (filterType == "sticker" || filterType == "stickerAdded") {
       const column: ColumnDef<SingleItem> = {
@@ -290,9 +352,11 @@ export default function ItemTable({
     return newColumns;
   }, [filterType]);
 
+  const columnsData = useColumnData(columnConfig);
   const table = useReactTable({
     data: data.items,
-    columns,
+    // columns: columnsData,
+    columns: columns,
     manualPagination: true,
     onGroupingChange: setGrouping,
     onSortingChange: setSorting,

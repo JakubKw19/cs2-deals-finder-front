@@ -96,17 +96,52 @@ export const columns: ColumnDef<SingleItem>[] = [
       return <div className="lowercase">{getValue() as string}</div>;
     },
     aggregationFn: (id, rows) => {
-      const first = rows[0];
-      const amount = parseFloat(first.getValue("steamDetails.price"));
-      const formatted = new Intl.NumberFormat("de-DE", {
+      const amount = parseFloat(
+        String(rows[0].getValue("steamDetails.price")).replace(
+          /[^0-9.-]+/g,
+          "",
+        ),
+      );
+      const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
       }).format(amount);
       return formatted;
     },
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("steamDetails.price"));
-      const formatted = new Intl.NumberFormat("de-DE", {
+      const amount = parseFloat(
+        String(row.getValue("steamDetails.price")).replace(/[^0-9.-]+/g, ""),
+      );
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount);
+      return <div className="lowercase">{formatted}</div>;
+    },
+  },
+  {
+    id: "buff163price",
+    accessorFn: (row) => row.buff163Details?.price,
+    header: "Buff price",
+    enableGrouping: true,
+    aggregatedCell: ({ getValue }) => {
+      return <div className="lowercase">{getValue() as string}</div>;
+    },
+    aggregationFn: (id, rows) => {
+      const amount = parseFloat(
+        String(rows[0].getValue("buff163price")).replace(/[^0-9.-]+/g, ""),
+      );
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount);
+      return formatted;
+    },
+    cell: ({ row }) => {
+      const amount = parseFloat(
+        String(row.getValue("buff163price")).replace(/[^0-9.-]+/g, ""),
+      );
+      const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
       }).format(amount);
@@ -122,17 +157,23 @@ export const columns: ColumnDef<SingleItem>[] = [
       return <div className="lowercase">{getValue() as string}</div>;
     },
     aggregationFn: (id, rows) => {
-      const first = rows[0];
-      const amount = parseFloat(first.getValue("csfloatDetails.price"));
-      const formatted = new Intl.NumberFormat("de-DE", {
+      const amount = parseFloat(
+        String(rows[0].getValue("csfloatDetails.price")).replace(
+          /[^0-9.-]+/g,
+          "",
+        ),
+      );
+      const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
       }).format(amount);
       return formatted;
     },
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("csfloatDetails.price"));
-      const formatted = new Intl.NumberFormat("de-DE", {
+      const amount = parseFloat(
+        String(row.getValue("csfloatDetails.price")).replace(/[^0-9.-]+/g, ""),
+      );
+      const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
       }).format(amount);
@@ -148,18 +189,26 @@ export const columns: ColumnDef<SingleItem>[] = [
       return <div className="lowercase">{getValue() as string}</div>;
     },
     aggregationFn: (id, rows) => {
-      const first = rows[0];
-      const amount = parseFloat(first.getValue("skinsMonkeyDetails.price"));
-      const formatted = new Intl.NumberFormat("de-DE", {
+      const amount = parseFloat(
+        String(rows[0].getValue("skinsMonkeyDetails.price")).replace(
+          /[^0-9.-]+/g,
+          "",
+        ),
+      );
+      const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
       }).format(amount);
       return formatted;
     },
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("skinsMonkeyDetails.price"));
-      // Format the amount as a dollar amount
-      const formatted = new Intl.NumberFormat("de-DE", {
+      const amount = parseFloat(
+        String(row.getValue("skinsMonkeyDetails.price")).replace(
+          /[^0-9.-]+/g,
+          "",
+        ),
+      );
+      const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
       }).format(amount);
@@ -168,15 +217,15 @@ export const columns: ColumnDef<SingleItem>[] = [
   },
 
   {
-    id: "steamMultiplyer",
-    accessorKey: "steamMultiplyer",
+    id: "steamAskMultiplyer",
+    accessorKey: "steamAskMultiplyer",
     enableGrouping: true,
     aggregatedCell: ({ getValue }) => {
       return <div className="lowercase">{getValue() as string}</div>;
     },
     aggregationFn: (id, rows) => {
       const first = rows[0];
-      return Number(first.getValue("steamMultiplyer")).toPrecision(4);
+      return Number(first.getValue("steamAskMultiplyer")).toPrecision(4);
     },
     header: ({ column }) => {
       return (
@@ -191,7 +240,7 @@ export const columns: ColumnDef<SingleItem>[] = [
     },
     cell: ({ row }) => (
       <div className="lowercase">
-        {Number(row.getValue("steamMultiplyer")).toPrecision(4)} %
+        {Number(row.getValue("steamAskMultiplyer")).toPrecision(4)} %
       </div>
     ),
   },
@@ -234,7 +283,7 @@ export const columns: ColumnDef<SingleItem>[] = [
   //     const amount = parseFloat(
   //       row.getValue("skinsMonkeyDetails.stickersPrice"),
   //     );
-  //     const formatted = new Intl.NumberFormat("de-DE", {
+  //     const formatted = new Intl.NumberFormat("en-US", {
   //       style: "currency",
   //       currency: "USD",
   //     }).format(amount);
