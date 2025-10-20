@@ -4,12 +4,13 @@ import { FaSteam } from "react-icons/fa";
 import SkinsmonkeyJPG from "@/../public/skinsmonkey.jpg";
 import csfloatPNG from "@/../public/csfloat.png";
 import { JSX } from "react";
+import { FilterType } from "./page";
 
 type columnTypes =
   | "currency"
   | "name"
   | "img"
-  | "link"
+  | "links"
   | "multiplyer"
   | "stock";
 
@@ -18,9 +19,8 @@ export type config = {
     grouping: boolean;
     type: columnTypes;
     displayName: string;
-    accessorFn?: (row: SingleItem) => number | undefined;
-    addedColumns?: string[];
-    takenColumns?: string[];
+    accessorFn?: (row: SingleItem) => any | undefined;
+    condition?: FilterType[];
   };
 };
 
@@ -38,12 +38,12 @@ const columnStrategies = {
       cell: ({ row }) => {
         if (row.depth > 0)
           return (
-            <div className="text-muted-foreground flex items-center pl-2 capitalize">
+            <div className="flex h-12 items-center overflow-clip pl-2 text-left capitalize">
               {row.getValue(id)}
             </div>
           );
         return (
-          <div className="flex h-12 w-40 items-center overflow-clip pl-2 text-left capitalize">
+          <div className="flex h-12 items-center overflow-clip pl-2 text-left capitalize">
             {row.getValue(id)}
           </div>
         );
@@ -52,7 +52,7 @@ const columnStrategies = {
   },
   currency: (
     id: string,
-    accessorFn: (row: SingleItem) => number | undefined,
+    accessorFn: (row: SingleItem) => any | undefined,
     header: ({ column }: any) => JSX.Element,
     grouping: boolean,
   ): ColumnDef<SingleItem> => {
@@ -91,7 +91,7 @@ const columnStrategies = {
   },
   img: (
     id: string,
-    accessorFn: (row: SingleItem) => number | undefined,
+    accessorFn: (row: SingleItem) => number | string | undefined,
     header: ({ column }: any) => JSX.Element,
     grouping: boolean,
   ): ColumnDef<SingleItem> => {
@@ -102,9 +102,9 @@ const columnStrategies = {
       enableGrouping: grouping,
       aggregatedCell: ({ getValue }) => {
         return (
-          <div className="flex w-20 justify-center">
+          <div className="flex justify-center">
             <img
-              className="h-10"
+              className="h-12"
               src={getValue() as string}
               alt={getValue() as string}
             />
@@ -118,9 +118,9 @@ const columnStrategies = {
       cell: ({ row }) => {
         if (row.depth > 0) return null;
         return (
-          <div className="flex w-20 justify-center">
+          <div className="flex justify-center">
             <img
-              className="h-10"
+              className="h-12"
               src={row.getValue(id)}
               alt={row.getValue(id)}
             />
@@ -131,7 +131,7 @@ const columnStrategies = {
   },
   multiplyer: (
     id: string,
-    accessorFn: (row: SingleItem) => number | undefined,
+    accessorFn: (row: SingleItem) => number | string | undefined,
     header: ({ column }: any) => JSX.Element,
     grouping: boolean,
   ): ColumnDef<SingleItem> => {
@@ -336,7 +336,10 @@ const columnStrategies = {
   },
 };
 
-export function useColumnData(config: config) {
+export function useColumnData(
+  config: config,
+  filterType: FilterType,
+): ColumnDef<SingleItem>[] {
   const columns = Object.keys(config).map((key) => {
     const columnConfig = config[key];
     const header = function () {
@@ -344,6 +347,11 @@ export function useColumnData(config: config) {
         <div className="flex justify-center">{columnConfig.displayName}</div>
       );
     };
+    if (columnConfig.condition) {
+      if (!columnConfig.condition.includes(filterType)) {
+        return null;
+      }
+    }
     switch (columnConfig.type) {
       case "name":
         return columnStrategies.name(key, header, columnConfig.grouping);
@@ -370,11 +378,11 @@ export function useColumnData(config: config) {
         );
       case "stock":
         return columnStrategies.stock();
-      case "link":
+      case "links":
         return columnStrategies.links();
       default:
         throw new Error(`Unknown column type: ${columnConfig.type}`);
     }
   });
-  return columns;
+  return columns.filter((col): col is ColumnDef<SingleItem> => col !== null);
 }

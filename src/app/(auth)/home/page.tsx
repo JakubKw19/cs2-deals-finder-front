@@ -29,10 +29,10 @@ const inputKeys = Object.keys({
 const types = [
   "sticker",
   "stickerAdded",
-  "buff",
+  // "buff",
   "csfloat",
   "steam",
-  "steambid",
+  // "steambid",
   "keychain",
   "blue",
   "skinplace",
@@ -40,7 +40,7 @@ const types = [
   "skinplaceAdded",
 ] as const;
 
-type FilterType = (typeof types)[number];
+export type FilterType = (typeof types)[number];
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useId, useState } from "react";
@@ -106,6 +106,12 @@ export default function Page() {
   const [minValue, setMinValue] = useState<string | null>("");
   const [maxValue, setMaxValue] = useState<string | null>("");
   const [ascending, setAscending] = useState<"desc" | "asc">("desc");
+  const [availability, setAvailability] = useState<string | null>("");
+  const [minBuffMultiplyer, setMinBuffMultiplyer] = useState<string | null>("");
+  const [minCsfloatMultiplyer, setMinCsfloatMultiplyer] = useState<
+    string | null
+  >("");
+  const [minStock, setMinStock] = useState<string | null>("");
   const [grouping, setGrouping] = useState<boolean>(true);
   const [pagination, setPagination] = useState({
     pageIndex: 1,
@@ -116,8 +122,12 @@ export default function Page() {
     min: minValue,
     max: maxValue,
     sortOrder: ascending,
+    available: availability,
+    stock: minStock,
     page: pagination.pageIndex.toString(),
     grouping: grouping ? "true" : "false",
+    minBuffMultiplyer: minBuffMultiplyer,
+    minCsfloatMultiplyer: minCsfloatMultiplyer,
   });
 
   useEffect(() => {
@@ -263,40 +273,109 @@ export default function Page() {
             </div>
           </div>
         </div>
-        <div className="mb-2 flex flex-wrap gap-2 overflow-y-auto">
-          {exampleTags.map((tag: Tag, index: number) => (
-            <div
-              key={tag.id}
-              className="bg-card flex items-center gap-1 rounded-full px-3 py-1 text-sm"
-            >
-              {tag.text}
-              <button
-                className="text-xs"
-                onClick={() =>
-                  setExampleTags((prev) => prev.filter((_, i) => i !== index))
-                }
+        <div className="flex justify-between">
+          <div className="mb-2 flex flex-wrap gap-2 overflow-y-auto">
+            {exampleTags.map((tag: Tag, index: number) => (
+              <div
+                key={tag.id}
+                className="bg-card flex items-center gap-1 rounded-full px-3 py-1 text-sm"
               >
-                ×
-              </button>
+                {tag.text}
+                <button
+                  className="text-xs"
+                  onClick={() =>
+                    setExampleTags((prev) => prev.filter((_, i) => i !== index))
+                  }
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-4 rounded">
+            <div className="group relative">
+              <label
+                htmlFor={id}
+                className="text-foreground absolute start-2 top-0 z-10 block -translate-y-1/2 px-2 text-xs font-medium group-has-disabled:opacity-50"
+              >
+                Set Minimal Stock
+              </label>
+              <Input
+                id={id}
+                placeholder="Value"
+                value={minStock}
+                pattern="[0-9]*"
+                onChange={(event) => setMinStock(event.target.value)}
+                className="!focus:outline-none focus-visible:border-input -ms-px rounded focus:ring-0 focus-visible:z-10 focus-visible:ring-0"
+              />
             </div>
-          ))}
+            <div className="group relative">
+              <label
+                htmlFor={id}
+                className="text-foreground absolute start-2 top-0 z-10 block -translate-y-1/2 px-2 text-xs font-medium group-has-disabled:opacity-50"
+              >
+                Set Minimal Availability
+              </label>
+              <Input
+                id={id}
+                placeholder="Value"
+                value={availability}
+                pattern="[0-9]*"
+                onChange={(event) => setAvailability(event.target.value)}
+                className="!focus:outline-none focus-visible:border-input -ms-px rounded focus:ring-0 focus-visible:z-10 focus-visible:ring-0"
+              />
+            </div>
+            <div className="group relative">
+              <label
+                htmlFor={id}
+                className="text-foreground absolute start-2 top-0 z-10 block -translate-y-1/2 px-2 text-xs font-medium group-has-disabled:opacity-50"
+              >
+                Min Buff163 Multiplyer
+              </label>
+              <Input
+                id={id}
+                placeholder="Value %"
+                value={minBuffMultiplyer}
+                pattern="[0-9]*"
+                onChange={(event) => setMinBuffMultiplyer(event.target.value)}
+                className="!focus:outline-none focus-visible:border-input -ms-px rounded focus:ring-0 focus-visible:z-10 focus-visible:ring-0"
+              />
+            </div>
+            <div className="group relative">
+              <label
+                htmlFor={id}
+                className="text-foreground absolute start-2 top-0 z-10 block -translate-y-1/2 px-2 text-xs font-medium group-has-disabled:opacity-50"
+              >
+                Min Csfloat Multiplyer
+              </label>
+              <Input
+                id={id}
+                placeholder="Value $"
+                value={minCsfloatMultiplyer}
+                pattern="[0-9]*"
+                onChange={(event) =>
+                  setMinCsfloatMultiplyer(event.target.value)
+                }
+                className="!focus:outline-none focus-visible:border-input -ms-px rounded focus:ring-0 focus-visible:z-10 focus-visible:ring-0"
+              />
+            </div>
+          </div>
         </div>
-
         {/* <div className="flex justify-center">
             <Button onClick={() => handleSearch()}>Search</Button>
           </div> */}
       </div>
-      {sortedItems.isLoading ? (
+      {/* {sortedItems.isLoading ? (
         <div>Loading</div>
-      ) : (
-        <ItemTable
-          data={sortedItems.data}
-          isLoading={sortedItems.isLoading}
-          filterType={currentType}
-          pagination={pagination}
-          setPagination={setPagination}
-        />
-      )}
+      ) : ( */}
+      <ItemTable
+        data={sortedItems.data}
+        isLoading={sortedItems.isLoading}
+        filterType={currentType}
+        pagination={pagination}
+        setPagination={setPagination}
+      />
+      {/* )} */}
     </div>
   );
 }
